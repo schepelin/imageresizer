@@ -25,10 +25,10 @@ REGISTRY ?= schepelin
 ARCH ?= amd64
 
 # This version-strategy uses git tags to set the version string
-#VERSION := $(shell git describe --tags --always --dirty)
+VERSION := $(shell git describe --tags --always --dirty)
 #
 # This version-strategy uses a manual value to set the version string
-VERSION := 0.0.1
+#VERSION := 0.0.1
 
 ###
 ### These variables should not need tweaking.
