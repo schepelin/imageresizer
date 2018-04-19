@@ -1,0 +1,6 @@
+.DS_Store
+.idea
+.go
+.dockerfile*
+.container*
+bin
