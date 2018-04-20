@@ -10,6 +10,8 @@ import (
 func main() {
 	const address string = "0.0.0.0:8081"
 
+	const dbConnect string = "postgres://schepelin:topsecret@localhost/image_resizer?sslmode=disable"
+
 	logger := log.New(os.Stdout, "", log.LstdFlags)
 
 	startServer(address, logger)

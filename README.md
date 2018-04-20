@@ -43,3 +43,13 @@ Run `make clean` to clean up.
 # Questions
 
 Why do build fail with `BUILD_IMAGE ?= golang:1.10.1-alpine`?
+
+# Notes
+Images table creation
+```postgresql
+CREATE TABLE images (
+    hash varchar(32) PRIMARY KEY,
+    data bytea,
+    created_at timestamp DEFAULT NOW()
+);
+```
