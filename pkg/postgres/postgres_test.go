@@ -4,16 +4,16 @@ import (
 	"image"
 	"os"
 	"testing"
-
-	"image/color"
-	"log"
 	"bytes"
 	"crypto/md5"
-	"io"
 	"encoding/hex"
-	"gopkg.in/DATA-DOG/go-sqlmock.v1"
 	"fmt"
+	"image/color"
 	"image/png"
+	"io"
+	"log"
+
+	"gopkg.in/DATA-DOG/go-sqlmock.v1"
 )
 
 func TestImageService_Create(t *testing.T) {
@@ -23,7 +23,7 @@ func TestImageService_Create(t *testing.T) {
 
 	is := ImageService{
 		Logger: logger,
-		DB: db,
+		DB:     db,
 	}
 
 	sampleImg := image.NewRGBA(image.Rect(0, 0, 10, 10))
@@ -37,20 +37,14 @@ func TestImageService_Create(t *testing.T) {
 
 	buf.Bytes()
 	hasher := md5.New()
-	fmt.Println("1***", buf.Bytes())
 	if _, err := io.Copy(hasher, bytes.NewReader(buf.Bytes())); err != nil {
 		t.Error("Something went wrong")
 	}
-	fmt.Println("2***", buf.Bytes())
 	hash := hex.EncodeToString(hasher.Sum(nil))
 
 	mock.ExpectExec("INSERT INTO images").WithArgs(hash, *buf)
 
-
-	img, err := is.Create(bytes.NewReader(buf.Bytes()))
-	fmt.Println("3***", buf.Bytes())
-	fmt.Println(StreamToByte(bytes.NewReader(buf.Bytes())))
-
+	img, err := is.Create(buf.Bytes())
 	if err != nil {
 		t.Error("Error while ImageService.Create ", err)
 	}

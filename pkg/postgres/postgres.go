@@ -4,15 +4,12 @@ import (
 	"crypto/md5"
 	"database/sql"
 	"encoding/hex"
-	"io"
+	"bytes"
+	"image/png"
+	"log"
 
 	_ "github.com/lib/pq"
 	"github.com/schepelin/imageresizer/pkg/imageresizer"
-
-	"log"
-	"image/png"
-	"fmt"
-	"bytes"
 )
 
 type ImageService struct {
@@ -20,37 +17,23 @@ type ImageService struct {
 	Logger *log.Logger
 }
 
-
-func StreamToByte(stream io.Reader) []byte {
-	buf := new(bytes.Buffer)
-	buf.ReadFrom(stream)
-	return buf.Bytes()
-}
-
-func StreamToString(stream io.Reader) string {
-	buf := new(bytes.Buffer)
-	buf.ReadFrom(stream)
-	return buf.String()
-}
-
-
-func (is *ImageService) Create(r io.Reader) (*imageresizer.Image, error) {
-
-	img, err := png.Decode(r)
+// TODO: Do I need *[]byte here
+func (is *ImageService) Create(b []byte) (*imageresizer.Image, error) {
+	buf := bytes.NewBuffer(b)
+	img, err := png.Decode(buf)
 	if err != nil {
 		is.Logger.Panic("Could not decode png ", err)
 		return nil, err
 	}
-	fmt.Println("###", StreamToByte(r))
 	hash := md5.New()
-	if _, err := io.Copy(hash, r); err != nil {
+	if _, err := hash.Write(b); err != nil {
 		return nil, err
 	}
 	imgObj := imageresizer.Image{
 		Hash:  hex.EncodeToString(hash.Sum(nil)),
 		Image: img,
 	}
-	is.DB.Query(`INSERT INTO images(hash, data) VALUES($1, $2)`, hash, r)
+	is.DB.Query(`INSERT INTO images(hash, data) VALUES($1, $2)`, hash, b)
 
 	return &imgObj, nil
 }
