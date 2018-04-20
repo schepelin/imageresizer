@@ -1,4 +1,3 @@
-
 package main
 
 import (
@@ -15,7 +14,6 @@ func main() {
 
 	startServer(address, logger)
 }
-
 
 func startServer(addr string, logger *log.Logger) {
 	server := http.NewServer(addr, logger)
