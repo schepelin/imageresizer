@@ -44,6 +44,8 @@ Run `make clean` to clean up.
 
 Why do build fail with `BUILD_IMAGE ?= golang:1.10.1-alpine`?
 
+How to access host machine from within docker container except `docker run --add-host="localhost:<your_host_ip>"`?
+
 # Notes
 Images table creation
 ```postgresql
