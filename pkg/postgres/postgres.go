@@ -8,14 +8,14 @@ import (
 	"io"
 
 	"bytes"
-	"github.com/schepelin/imageresizer/pkg/imageresizer"
 	_ "github.com/lib/pq"
+	"github.com/schepelin/imageresizer/pkg/imageresizer"
 
 	"log"
 )
 
 type ImageService struct {
-	DB *sql.DB
+	DB     *sql.DB
 	Logger *log.Logger
 }
 
@@ -44,7 +44,7 @@ func New(dbConnect string, logger *log.Logger) *ImageService {
 		logger.Fatal("could not connect to the database", err)
 	}
 	return &ImageService{
-		DB: db,
+		DB:     db,
 		Logger: logger,
 	}
 }
