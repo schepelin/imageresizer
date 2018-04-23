@@ -62,3 +62,11 @@ func (is *ImageService) Read(ctx context.Context, id string) (*resizer.Image, er
 	}, nil
 
 }
+
+func (is *ImageService) Delete(ctx context.Context, id string) error {
+	err := is.Storage.Delete(ctx, id)
+	if err != nil {
+		return err
+	}
+	return nil
+}

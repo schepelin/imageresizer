@@ -37,7 +37,7 @@ func (m *MockImageService) EXPECT() *MockImageServiceMockRecorder {
 }
 
 // Create mocks base method
-func (m *MockImageService) Create(ctx context.Context, raw []byte) (*resizer.Image, error) {
+func (m *MockImageService) Create(ctx context.Context, raw *[]byte) (*resizer.Image, error) {
 	ret := m.ctrl.Call(m, "Create", ctx, raw)
 	ret0, _ := ret[0].(*resizer.Image)
 	ret1, _ := ret[1].(error)

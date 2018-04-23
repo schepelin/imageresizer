@@ -59,18 +59,18 @@ func TestImageService_Create(t *testing.T) {
 	ctx := context.TODO()
 	is := NewImageService(mockStorage, mockClocker, mockHasher, mockConverter)
 	rawByte := []byte{42, 10, 15}
-	expectedHash := "42"
+	expectedId := "42"
 	expectedCteatedAt := time.Date(1970, time.January, 1, 0, 0, 0, 0, time.UTC)
 	expectedImage := createSampleImage()
 
-	mockHasher.EXPECT().Gen(&rawByte).Return(expectedHash)
+	mockHasher.EXPECT().Gen(&rawByte).Return(expectedId)
 	mockClocker.EXPECT().Now().Return(expectedCteatedAt)
 	mockConverter.EXPECT().Transform(&rawByte).Return(expectedImage, nil)
 	mockStorage.EXPECT().Create(ctx, gomock.Any()).Return(nil)
 
 	imgObj, _ := is.Create(ctx, &rawByte)
 
-	assert.Equal(t, imgObj.Id, expectedHash)
+	assert.Equal(t, imgObj.Id, expectedId)
 	assert.Equal(t, imgObj.Image, expectedImage)
 	assert.Equal(t, imgObj.CreatedAt, expectedCteatedAt)
 
@@ -96,4 +96,16 @@ func TestImageService_Read(t *testing.T) {
 	assert.Equal(t, imgObj.Id, imageModelId)
 	assert.Equal(t, imgObj.Image, expectedImage)
 	assert.Equal(t, imgObj.CreatedAt, storageReturnValue.CreatedAt)
+}
+
+func TestImageService_Delete(t *testing.T) {
+	mockClocker, mockStorage, mockHasher, mockConverter := initMockersForImageService(t)
+	ctx := context.TODO()
+	is := NewImageService(mockStorage, mockClocker, mockHasher, mockConverter)
+	imgId := "42"
+
+	mockStorage.EXPECT().Delete(ctx, "42").Return(nil).Times(1)
+	err := is.Delete(ctx, imgId)
+	assert.NoError(t, err)
+
 }

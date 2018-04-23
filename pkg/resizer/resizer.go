@@ -14,7 +14,7 @@ type Image struct {
 }
 
 type ImageService interface {
-	Create(ctx context.Context, raw []byte) (*Image, error)
+	Create(ctx context.Context, raw *[]byte) (*Image, error)
 	Read(ctx context.Context, imgId string) (*Image, error)
 	Delete(ctx context.Context, imgId string) error
 }
