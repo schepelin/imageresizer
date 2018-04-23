@@ -1,16 +1,15 @@
 package resizer
 
 import (
+	"context"
 	"image"
 	"time"
-	"context"
 )
-
 
 //go:generate mockgen -source=resizer.go -destination ../mocks/mock_resizer.go -package mocks
 type Image struct {
-	Id  string
-	Image image.Image
+	Id        string
+	Image     image.Image
 	CreatedAt time.Time
 }
 
@@ -20,11 +19,9 @@ type ImageService interface {
 	Delete(ctx context.Context, imgId string) error
 }
 
-
 type Clocker interface {
 	Now() time.Time
 }
-
 
 type Hasher interface {
 	Gen(raw *[]byte) string

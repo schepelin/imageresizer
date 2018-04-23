@@ -45,3 +45,28 @@ func (m *MockStorage) Create(ctx context.Context, model *storage.ImageModel) err
 func (mr *MockStorageMockRecorder) Create(ctx, model interface{}) *gomock.Call {
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Create", reflect.TypeOf((*MockStorage)(nil).Create), ctx, model)
 }
+
+// Get mocks base method
+func (m *MockStorage) Get(ctx context.Context, id string) (*storage.ImageModel, error) {
+	ret := m.ctrl.Call(m, "Get", ctx, id)
+	ret0, _ := ret[0].(*storage.ImageModel)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// Get indicates an expected call of Get
+func (mr *MockStorageMockRecorder) Get(ctx, id interface{}) *gomock.Call {
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Get", reflect.TypeOf((*MockStorage)(nil).Get), ctx, id)
+}
+
+// Delete mocks base method
+func (m *MockStorage) Delete(ctx context.Context, id string) error {
+	ret := m.ctrl.Call(m, "Delete", ctx, id)
+	ret0, _ := ret[0].(error)
+	return ret0
+}
+
+// Delete indicates an expected call of Delete
+func (mr *MockStorageMockRecorder) Delete(ctx, id interface{}) *gomock.Call {
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Delete", reflect.TypeOf((*MockStorage)(nil).Delete), ctx, id)
+}

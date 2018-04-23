@@ -9,12 +9,12 @@ import (
 
 type Storage interface {
 	Create(ctx context.Context, model *ImageModel) error
+	Get(ctx context.Context, id string) (*ImageModel, error)
+	Delete(ctx context.Context, id string) error
 }
 
-
-
-type ImageModel struct {
-	Id string
-	Raw []byte
+type ImageModel struct { // rename
+	Id        string
+	Raw       []byte
 	CreatedAt time.Time
 }

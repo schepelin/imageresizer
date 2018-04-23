@@ -13,12 +13,12 @@ type ImageService struct {
 	Converter resizer.Converter
 }
 
-func NewImageService(storage storage.Storage, clock resizer.Clocker,
+func NewImageService(s storage.Storage, cl resizer.Clocker,
 	h resizer.Hasher, c resizer.Converter) *ImageService {
 
 	return &ImageService{
-		Storage:   storage,
-		Clock:     clock,
+		Storage:   s,
+		Clock:     cl,
 		Hash:      h,
 		Converter: c,
 	}
@@ -35,6 +35,23 @@ func (is *ImageService) Create(ctx context.Context, raw *[]byte) (*resizer.Image
 		return nil, err
 	}
 	img, err := is.Converter.Transform(raw)
+	if err != nil {
+		return nil, err
+	}
+	return &resizer.Image{
+		Id:        imgModel.Id,
+		Image:     img,
+		CreatedAt: imgModel.CreatedAt,
+	}, nil
+
+}
+
+func (is *ImageService) Read(ctx context.Context, id string) (*resizer.Image, error) {
+	imgModel, err := is.Storage.Get(ctx, id)
+	if err != nil {
+		return nil, err
+	}
+	img, err := is.Converter.Transform(&imgModel.Raw)
 	if err != nil {
 		return nil, err
 	}
