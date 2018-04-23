@@ -1,10 +1,10 @@
 package postgres
 
 import (
+	"bytes"
 	"crypto/md5"
 	"database/sql"
 	"encoding/hex"
-	"bytes"
 	"image/png"
 	"log"
 

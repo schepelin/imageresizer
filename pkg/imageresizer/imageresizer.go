@@ -1,7 +1,6 @@
 package imageresizer
 
 import (
-	"bytes"
 	"image"
 )
 
@@ -12,7 +11,7 @@ type Image struct {
 }
 
 type ImageService interface {
-	Create(r *bytes.Reader) (*Image, error)
+	Create(b []byte) (*Image, error)
 	//Read(imgId ImageId) (*Image, error)
 	//Delete(imgId ImageId) bool
 }

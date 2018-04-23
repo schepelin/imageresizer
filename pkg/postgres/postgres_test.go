@@ -1,17 +1,17 @@
 package postgres
 
 import (
-	"image"
-	"os"
-	"testing"
 	"bytes"
 	"crypto/md5"
 	"encoding/hex"
 	"fmt"
+	"image"
 	"image/color"
 	"image/png"
 	"io"
 	"log"
+	"os"
+	"testing"
 
 	"gopkg.in/DATA-DOG/go-sqlmock.v1"
 )
