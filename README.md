@@ -43,3 +43,7 @@ Run `make clean` to clean up.
 # Questions
 
 Why do build fail with `BUILD_IMAGE ?= golang:1.10.1-alpine`?
+
+How to access host machine from within docker container except `docker run --add-host="localhost:<your_host_ip>"`?
+
+Should I use sql-migrate as a CLI tool or as a library?

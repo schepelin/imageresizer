@@ -2,8 +2,8 @@ package http
 
 import (
 	"io"
-	"net/http"
 	"log"
+	"net/http"
 )
 
 func createImage(w http.ResponseWriter, r *http.Request) {
@@ -16,9 +16,8 @@ func createImage(w http.ResponseWriter, r *http.Request) {
 	io.WriteString(w, "Hello World")
 }
 
-
 type Server struct {
-	Addr string
+	Addr   string
 	Logger *log.Logger
 }
 
@@ -31,7 +30,7 @@ func (s *Server) Start() {
 
 func NewServer(addr string, logger *log.Logger) *Server {
 	return &Server{
-		Addr: addr,
+		Addr:   addr,
 		Logger: logger,
 	}
 }
