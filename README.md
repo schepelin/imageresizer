@@ -46,12 +46,4 @@ Why do build fail with `BUILD_IMAGE ?= golang:1.10.1-alpine`?
 
 How to access host machine from within docker container except `docker run --add-host="localhost:<your_host_ip>"`?
 
-# Notes
-Images table creation
-```postgresql
-CREATE TABLE images (
-    hash varchar(32) PRIMARY KEY,
-    data bytea,
-    created_at timestamp DEFAULT NOW()
-);
-```
+Should I use sql-migrate as a CLI tool or as a library?

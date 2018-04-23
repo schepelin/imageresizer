@@ -17,7 +17,6 @@ type ImageService struct {
 	Logger *log.Logger
 }
 
-// TODO: Do I need *[]byte here
 func (is *ImageService) Create(b []byte) (*imageresizer.Image, error) {
 	buf := bytes.NewBuffer(b)
 	img, err := png.Decode(buf)
@@ -43,6 +42,7 @@ func New(dbConnect string, logger *log.Logger) *ImageService {
 	if err != nil {
 		logger.Fatal("could not connect to the database ", err)
 	}
+
 	return &ImageService{
 		DB:     db,
 		Logger: logger,

@@ -1,0 +1,10 @@
+development:
+    dialect: postgres
+    datasource: dbname=image_resizer sslmode=disable
+    table: migrations
+
+production:
+    dialect: postgres
+    datasource: dbname=image_resizer sslmode=disable
+    dir: migrations
+    table: migrations
