@@ -1,8 +1,8 @@
 
 -- +migrate Up
 CREATE TABLE images (
-    hash varchar(32) PRIMARY KEY,
-    data bytea,
+    id varchar PRIMARY KEY,
+    raw bytea NOT NULL,
     created_at timestamp DEFAULT NOW()
 );
 
