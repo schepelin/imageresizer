@@ -15,18 +15,6 @@ import (
 	"time"
 )
 
-func initMockersForImageService(t *testing.T) (*mocks.MockClocker, *mocks.MockStorage, *mocks.MockHasher, *mocks.MockConverter) {
-	mockCtrl := gomock.NewController(t)
-	defer mockCtrl.Finish()
-
-	mockClocker := mocks.NewMockClocker(mockCtrl)
-	mockStorage := mocks.NewMockStorage(mockCtrl)
-	mockHasher := mocks.NewMockHasher(mockCtrl)
-	mockConverter := mocks.NewMockConverter(mockCtrl)
-
-	return mockClocker, mockStorage, mockHasher, mockConverter
-}
-
 func createSampleImage() image.Image {
 	sampleImg := image.NewRGBA(image.Rect(0, 0, 10, 10))
 	sampleImg.Set(1, 1, color.RGBA{255, 0, 0, 255})
@@ -43,7 +31,13 @@ func imageToByte(img image.Image) []byte {
 }
 
 func TestNewImageService(t *testing.T) {
-	mockClocker, mockStorage, mockHasher, mockConverter := initMockersForImageService(t)
+	mockCtrl := gomock.NewController(t)
+	defer mockCtrl.Finish()
+
+	mockClocker := mocks.NewMockClocker(mockCtrl)
+	mockStorage := mocks.NewMockStorage(mockCtrl)
+	mockHasher := mocks.NewMockHasher(mockCtrl)
+	mockConverter := mocks.NewMockConverter(mockCtrl)
 
 	is := NewImageService(mockStorage, mockClocker, mockHasher, mockConverter)
 
@@ -54,7 +48,13 @@ func TestNewImageService(t *testing.T) {
 }
 
 func TestImageService_Create(t *testing.T) {
-	mockClocker, mockStorage, mockHasher, mockConverter := initMockersForImageService(t)
+	mockCtrl := gomock.NewController(t)
+	defer mockCtrl.Finish()
+
+	mockClocker := mocks.NewMockClocker(mockCtrl)
+	mockStorage := mocks.NewMockStorage(mockCtrl)
+	mockHasher := mocks.NewMockHasher(mockCtrl)
+	mockConverter := mocks.NewMockConverter(mockCtrl)
 
 	ctx := context.TODO()
 	is := NewImageService(mockStorage, mockClocker, mockHasher, mockConverter)
@@ -77,7 +77,14 @@ func TestImageService_Create(t *testing.T) {
 }
 
 func TestImageService_Read(t *testing.T) {
-	mockClocker, mockStorage, mockHasher, mockConverter := initMockersForImageService(t)
+	mockCtrl := gomock.NewController(t)
+	defer mockCtrl.Finish()
+
+	mockClocker := mocks.NewMockClocker(mockCtrl)
+	mockStorage := mocks.NewMockStorage(mockCtrl)
+	mockHasher := mocks.NewMockHasher(mockCtrl)
+	mockConverter := mocks.NewMockConverter(mockCtrl)
+
 	expectedImage := createSampleImage()
 	expectedImageRaw := imageToByte(expectedImage)
 	imageModelId := "42"
@@ -99,7 +106,14 @@ func TestImageService_Read(t *testing.T) {
 }
 
 func TestImageService_Delete(t *testing.T) {
-	mockClocker, mockStorage, mockHasher, mockConverter := initMockersForImageService(t)
+	mockCtrl := gomock.NewController(t)
+	defer mockCtrl.Finish()
+
+	mockClocker := mocks.NewMockClocker(mockCtrl)
+	mockStorage := mocks.NewMockStorage(mockCtrl)
+	mockHasher := mocks.NewMockHasher(mockCtrl)
+	mockConverter := mocks.NewMockConverter(mockCtrl)
+
 	ctx := context.TODO()
 	is := NewImageService(mockStorage, mockClocker, mockHasher, mockConverter)
 	imgId := "42"
