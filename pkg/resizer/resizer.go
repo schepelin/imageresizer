@@ -37,13 +37,13 @@ type Converter interface {
 
 type ClockUTC struct{}
 
-func (c *ClockUTC) Now() time.Time {
+func (c ClockUTC) Now() time.Time {
 	return time.Now().UTC()
 }
 
 type ConverterPNG struct{}
 
-func (cnv *ConverterPNG) Transform(raw *[]byte) (image.Image, error) {
+func (cnv ConverterPNG) Transform(raw *[]byte) (image.Image, error) {
 	buf := bytes.NewBuffer(*raw)
 	img, err := png.Decode(buf)
 	if err != nil {
@@ -54,7 +54,7 @@ func (cnv *ConverterPNG) Transform(raw *[]byte) (image.Image, error) {
 
 type HasherMD5 struct{}
 
-func (h *HasherMD5) Gen(raw *[]byte) string {
+func (h HasherMD5) Gen(raw *[]byte) string {
 	hash := md5.New()
 	hash.Write(*raw)
 
