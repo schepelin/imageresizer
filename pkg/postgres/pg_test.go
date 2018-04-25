@@ -105,9 +105,10 @@ func dropTestDB(dbName string) error {
 }
 
 func TestNewPostgresStorage(t *testing.T) {
-	_, err := NewPostgresStorage("postgres://test:test@localhost/test?sslmode=disable")
-	assert.NoError(t, err)
-	// TODO: How to check ps
+	var deps dependencies
+	defer preparator(t, &deps)()
+	ps := NewPostgresStorage(deps.db)
+	assert.NoError(t, ps.DB.Ping())
 }
 
 func TestPostgresStorage_Get(t *testing.T) {

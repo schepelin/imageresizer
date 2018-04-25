@@ -12,6 +12,8 @@ import (
 	"image/color"
 	"image/png"
 	"log"
+	"database/sql"
+	"os"
 )
 
 func createSampleImage() []byte {
@@ -26,16 +28,17 @@ func createSampleImage() []byte {
 }
 
 func main() {
-	//const address string = "0.0.0.0:8081"
-
-	const dbConnect string = "postgres://schepelin:topsecret@localhost/image_resizer?sslmode=disable"
-
-	// logger := log.New(os.Stdout, "", log.LstdFlags)
-
-	ps, err := postgres.NewPostgresStorage(dbConnect)
+	var err error
+	logger := log.New(os.Stdout, "", log.LstdFlags)
+	const dbConnect string = "postgres://localhost/image_resizer?sslmode=disable"
+	db, err := sql.Open("postgres", dbConnect)
+	defer db.Close()
 	if err != nil {
-		fmt.Println("Can not connect to the database", dbConnect)
+		logger.Panic("Could not connect to the database")
 	}
+
+
+	ps := postgres.NewPostgresStorage(db)
 	h := resizer.HasherMD5{}
 	cl := resizer.ClockUTC{}
 	cnv := resizer.ConverterPNG{}
@@ -44,12 +47,10 @@ func main() {
 
 	b := createSampleImage()
 	ctx := context.TODO()
-	imgObj, err := is.Create(ctx, &b)
+	_, err = is.Create(ctx, &b)
 	if err != nil {
-		fmt.Println(err)
+		logger.Panic("Could not write an image to the database")
 	}
-	fmt.Println("IMG****", imgObj)
-
 }
 
 func startServer(addr string, logger *log.Logger) {

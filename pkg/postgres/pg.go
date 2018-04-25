@@ -14,18 +14,12 @@ type PostgresStorage struct {
 	DB *sql.DB
 }
 
-func NewPostgresStorage(connect string) (*PostgresStorage, error) {
-	db, err := sql.Open("postgres", connect)
-	// FIXME: Who is supposed to close db conncetion?
-	if err != nil {
-		return nil, err
-	}
-	return &PostgresStorage{db}, nil
+func NewPostgresStorage(db *sql.DB) *PostgresStorage {
+	return &PostgresStorage{db}
 }
 
 func (ps *PostgresStorage) Create(ctx context.Context, imgModel *storage.ImageModel) error {
 	var err error
-	err = ps.DB.Ping()
 	_, err = ps.DB.Exec(
 		`INSERT INTO images(id, raw, created_at) VALUES($1, $2, $3)`,
 		imgModel.Id,
