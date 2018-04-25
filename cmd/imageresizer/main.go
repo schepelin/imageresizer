@@ -2,18 +2,18 @@ package main
 
 import (
 	"bytes"
-	"context"
+	"database/sql"
 	"fmt"
-	"github.com/schepelin/imageresizer/pkg/http"
 	"github.com/schepelin/imageresizer/pkg/imageservice"
 	"github.com/schepelin/imageresizer/pkg/postgres"
 	"github.com/schepelin/imageresizer/pkg/resizer"
+	httptransport "github.com/go-kit/kit/transport/http"
 	"image"
 	"image/color"
 	"image/png"
 	"log"
-	"database/sql"
 	"os"
+	"net/http"
 )
 
 func createSampleImage() []byte {
@@ -28,6 +28,10 @@ func createSampleImage() []byte {
 }
 
 func main() {
+
+	rawImage := createSampleImage()
+	fmt.Println("Image:", rawImage)
+
 	var err error
 	logger := log.New(os.Stdout, "", log.LstdFlags)
 	const dbConnect string = "postgres://localhost/image_resizer?sslmode=disable"
@@ -37,7 +41,6 @@ func main() {
 		logger.Panic("Could not connect to the database")
 	}
 
-
 	ps := postgres.NewPostgresStorage(db)
 	h := resizer.HasherMD5{}
 	cl := resizer.ClockUTC{}
@@ -45,15 +48,13 @@ func main() {
 
 	is := imageservice.NewImageService(ps, cl, h, cnv)
 
-	b := createSampleImage()
-	ctx := context.TODO()
-	_, err = is.Create(ctx, &b)
-	if err != nil {
-		logger.Panic("Could not write an image to the database")
-	}
-}
+	createHandler := httptransport.NewServer(
+		imageservice.MakeCreateEndpoint(is),
+		imageservice.DecodeCreateRequest,
+		imageservice.EncodeResponse,
+	)
 
-func startServer(addr string, logger *log.Logger) {
-	server := http.NewServer(addr, logger)
-	server.Start()
+	http.Handle("/images", createHandler)
+	logger.Fatal(http.ListenAndServe(":8080", nil))
+
 }

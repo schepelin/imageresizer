@@ -11,7 +11,6 @@ require (
 	"github.com/stretchr/testify" v1.2.1
 	"github.com/ziutek/mymysql" v1.5.4
 	"golang.org/x/net" v0.0.0-20180420171651-5f9ae10d9af5
-	"gopkg.in/DATA-DOG/go-sqlmock.v1" v1.3.0-gopkgin-v1.3.0
 	"gopkg.in/check.v1" v0.0.0-20161208181325-20d25e280405
 	"gopkg.in/gorp.v1" v1.7.1-gopkgin-v1.7.1
 )
