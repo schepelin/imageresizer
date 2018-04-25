@@ -25,3 +25,13 @@ func MakeCreateEndpoint(svc resizer.ImageService) endpoint.Endpoint {
 		return createResponse{imgObj.Id, ""}, nil
 	}
 }
+
+type Endpoints struct {
+	CreateImageEndpoint endpoint.Endpoint
+}
+
+func MakeServerEndpoint(svc resizer.ImageService) Endpoints {
+	return Endpoints{
+		CreateImageEndpoint: MakeCreateEndpoint(svc),
+	}
+}

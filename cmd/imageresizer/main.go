@@ -7,13 +7,12 @@ import (
 	"github.com/schepelin/imageresizer/pkg/imageservice"
 	"github.com/schepelin/imageresizer/pkg/postgres"
 	"github.com/schepelin/imageresizer/pkg/resizer"
-	httptransport "github.com/go-kit/kit/transport/http"
 	"image"
 	"image/color"
 	"image/png"
 	"log"
-	"os"
 	"net/http"
+	"os"
 )
 
 func createSampleImage() []byte {
@@ -48,13 +47,7 @@ func main() {
 
 	is := imageservice.NewImageService(ps, cl, h, cnv)
 
-	createHandler := httptransport.NewServer(
-		imageservice.MakeCreateEndpoint(is),
-		imageservice.DecodeCreateRequest,
-		imageservice.EncodeResponse,
-	)
-
-	http.Handle("/images", createHandler)
-	logger.Fatal(http.ListenAndServe(":8080", nil))
+	handler := imageservice.MakeHTTPHandler(is)
+	logger.Fatal(http.ListenAndServe(":8080", handler))
 
 }
