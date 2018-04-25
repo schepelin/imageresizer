@@ -8,20 +8,19 @@ import (
 	"time"
 )
 
+//go:generate go-bindata -prefix ../.. -pkg migrations -o ../migrations/migrations.go ../../migrations
+
 type PostgresStorage struct {
 	DB *sql.DB
 }
 
-func NewPostgresStorage(connect string) (*PostgresStorage, error) {
-	db, err := sql.Open("postgres", connect)
-	if err != nil {
-		return nil, err
-	}
-	return &PostgresStorage{db}, nil
+func NewPostgresStorage(db *sql.DB) *PostgresStorage {
+	return &PostgresStorage{db}
 }
 
 func (ps *PostgresStorage) Create(ctx context.Context, imgModel *storage.ImageModel) error {
-	_, err := ps.DB.Exec(
+	var err error
+	_, err = ps.DB.Exec(
 		`INSERT INTO images(id, raw, created_at) VALUES($1, $2, $3)`,
 		imgModel.Id,
 		string(imgModel.Raw),
@@ -37,7 +36,7 @@ func (ps *PostgresStorage) Create(ctx context.Context, imgModel *storage.ImageMo
 func (ps *PostgresStorage) Get(ctx context.Context, id string) (*storage.ImageModel, error) {
 	var raw string
 	var createdAt time.Time
-	err := ps.DB.QueryRow("SELECT raw, created_at FROM images WHERE id=?", id).Scan(
+	err := ps.DB.QueryRow("SELECT raw, created_at FROM images WHERE id=$1", id).Scan(
 		&raw,
 		&createdAt,
 	)
@@ -52,6 +51,6 @@ func (ps *PostgresStorage) Get(ctx context.Context, id string) (*storage.ImageMo
 }
 
 func (ps *PostgresStorage) Delete(ctx context.Context, id string) error {
-	_, err := ps.DB.Exec("DELETE FROM images WHERE id=?", id)
+	_, err := ps.DB.Exec("DELETE FROM images WHERE id=$1", id)
 	return err
 }
