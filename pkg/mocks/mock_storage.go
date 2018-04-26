@@ -70,3 +70,16 @@ func (m *MockStorage) Delete(ctx context.Context, id string) error {
 func (mr *MockStorageMockRecorder) Delete(ctx, id interface{}) *gomock.Call {
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Delete", reflect.TypeOf((*MockStorage)(nil).Delete), ctx, id)
 }
+
+// CreateResizeJob mocks base method
+func (m *MockStorage) CreateResizeJob(ctx context.Context, req *storage.ResizeJobRequest) (*storage.ResizeJobResponse, error) {
+	ret := m.ctrl.Call(m, "CreateResizeJob", ctx, req)
+	ret0, _ := ret[0].(*storage.ResizeJobResponse)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// CreateResizeJob indicates an expected call of CreateResizeJob
+func (mr *MockStorageMockRecorder) CreateResizeJob(ctx, req interface{}) *gomock.Call {
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "CreateResizeJob", reflect.TypeOf((*MockStorage)(nil).CreateResizeJob), ctx, req)
+}

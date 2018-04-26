@@ -17,10 +17,20 @@ type Image struct {
 	CreatedAt time.Time
 }
 
+type ResizeJob struct {
+	Id uint64
+	ImageId string
+	Status string
+	Image image.Image
+	CreatedAt time.Time
+	// TODO: extend the service object if necessary
+}
+
 type ImageService interface {
 	Create(ctx context.Context, raw *[]byte) (*Image, error)
 	Read(ctx context.Context, imgId string) (*Image, error)
 	Delete(ctx context.Context, imgId string) error
+	ScheduleResizeJob(ctx context.Context, imgId string, width, height uint32) (*ResizeJob, error)
 }
 
 type Clocker interface {
@@ -52,7 +62,8 @@ func (cnv ConverterPNG) Transform(raw *[]byte) (image.Image, error) {
 	return img, nil
 }
 
-type HasherMD5 struct{}
+
+type HasherMD5 struct {}
 
 func (h HasherMD5) Gen(raw *[]byte) string {
 	hash := md5.New()

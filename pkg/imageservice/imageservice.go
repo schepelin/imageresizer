@@ -70,3 +70,29 @@ func (is *ImageService) Delete(ctx context.Context, id string) error {
 	}
 	return nil
 }
+
+func (is *ImageService) ScheduleResizeJob(ctx context.Context, id string, width, height uint32) (*resizer.ResizeJob, error) {
+	var err error
+	img, err := is.Storage.Get(ctx, id)
+	if err != nil {
+		return nil, err
+	}
+	req := storage.ResizeJobRequest{
+		ImgId:  img.Id,
+		Width:  width,
+		Height: height,
+	}
+	resp, err := is.Storage.CreateResizeJob(ctx, &req)
+	if err != nil {
+		return nil, err
+	}
+	return &resizer.ResizeJob{
+		Id: resp.Id,
+		ImageId: img.Id,
+		Status: resp.Status,
+		Image: nil,
+		CreatedAt: resp.CreatedAt,
+
+	}, nil
+
+}

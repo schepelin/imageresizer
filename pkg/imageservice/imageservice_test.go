@@ -123,3 +123,41 @@ func TestImageService_Delete(t *testing.T) {
 	assert.NoError(t, err)
 
 }
+
+func TestImageService_ScheduleResizeJob(t *testing.T) {
+	mockCtrl := gomock.NewController(t)
+	defer mockCtrl.Finish()
+
+	mockClocker := mocks.NewMockClocker(mockCtrl)
+	mockStorage := mocks.NewMockStorage(mockCtrl)
+	mockHasher := mocks.NewMockHasher(mockCtrl)
+	mockConverter := mocks.NewMockConverter(mockCtrl)
+	ctx := context.TODO()
+	imgId := "42322"
+	var w, h uint32 = 200, 100
+	is := NewImageService(mockStorage, mockClocker, mockHasher, mockConverter)
+
+	response := storage.ResizeJobResponse{
+		Id: 100500,
+		Status: "CREATED",
+		CreatedAt: time.Date(1970, time.January, 0,0,0,0,0, time.UTC),
+	}
+	originalImage := storage.ImageModel{
+		Id:        imgId,
+		Raw:       []byte{10,15,42},
+		CreatedAt: time.Date(1970, time.January, 1, 0, 0, 0, 0, time.UTC),
+	}
+	expectedRequest := storage.ResizeJobRequest{imgId, w, h}
+	firstCall := mockStorage.EXPECT().Get(ctx, imgId).Return(&originalImage, nil)
+	mockStorage.EXPECT().CreateResizeJob(ctx, &expectedRequest).Return(&response, nil).After(firstCall)
+
+	rj, err := is.ScheduleResizeJob(ctx, imgId, w, h)
+	assert.NoError(t, err)
+
+	assert.Equal(t, response.CreatedAt, rj.CreatedAt)
+	assert.Equal(t, response.Status, rj.Status)
+	assert.Equal(t, response.Id, rj.Id)
+	assert.Equal(t, expectedRequest.ImgId, rj.ImageId)
+	assert.Nil(t, rj.Image)
+
+}
