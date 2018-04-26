@@ -27,10 +27,6 @@ func createSampleImage() []byte {
 }
 
 func main() {
-
-	rawImage := createSampleImage()
-	fmt.Println("Image:", rawImage)
-
 	var err error
 	logger := log.New(os.Stdout, "", log.LstdFlags)
 	const dbConnect string = "postgres://localhost/image_resizer?sslmode=disable"
@@ -49,5 +45,4 @@ func main() {
 
 	handler := imageservice.MakeHTTPHandler(is)
 	logger.Fatal(http.ListenAndServe(":8080", handler))
-
 }
