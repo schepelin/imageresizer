@@ -2,9 +2,8 @@ package main
 
 import (
 	"bytes"
-	"context"
+	"database/sql"
 	"fmt"
-	"github.com/schepelin/imageresizer/pkg/http"
 	"github.com/schepelin/imageresizer/pkg/imageservice"
 	"github.com/schepelin/imageresizer/pkg/postgres"
 	"github.com/schepelin/imageresizer/pkg/resizer"
@@ -12,7 +11,7 @@ import (
 	"image/color"
 	"image/png"
 	"log"
-	"database/sql"
+	"net/http"
 	"os"
 )
 
@@ -37,7 +36,6 @@ func main() {
 		logger.Panic("Could not connect to the database")
 	}
 
-
 	ps := postgres.NewPostgresStorage(db)
 	h := resizer.HasherMD5{}
 	cl := resizer.ClockUTC{}
@@ -45,15 +43,6 @@ func main() {
 
 	is := imageservice.NewImageService(ps, cl, h, cnv)
 
-	b := createSampleImage()
-	ctx := context.TODO()
-	_, err = is.Create(ctx, &b)
-	if err != nil {
-		logger.Panic("Could not write an image to the database")
-	}
-}
-
-func startServer(addr string, logger *log.Logger) {
-	server := http.NewServer(addr, logger)
-	server.Start()
+	handler := imageservice.MakeHTTPHandler(is)
+	logger.Fatal(http.ListenAndServe(":8080", handler))
 }
