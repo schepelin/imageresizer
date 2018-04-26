@@ -54,3 +54,43 @@ func (ps *PostgresStorage) Delete(ctx context.Context, id string) error {
 	_, err := ps.DB.Exec("DELETE FROM images WHERE id=$1", id)
 	return err
 }
+
+func (ps *PostgresStorage) CreateResizeJob(ctx context.Context,
+	req *storage.ResizeJobRequest) (*storage.ResizeJobResponse, error) {
+	var err error
+	var imageExists bool
+	var createdAt time.Time
+	var jobId uint64
+	tx, err := ps.DB.Begin()
+	defer func() {
+		if err != nil {
+			tx.Rollback()
+			return
+		}
+		err = tx.Commit()
+	}()
+
+	err = tx.QueryRow("SELECT exists(SELECT 1 FROM images where id=$1)", req.ImgId).Scan(&imageExists)
+	if err != nil {
+		return nil, err
+	}
+	if !imageExists {
+		return nil, storage.ErrNoImageFound
+	}
+	err = tx.QueryRow(
+		`INSERT INTO resize_jobs(image_id, status, width, height)
+				VALUES($1, $2, $3, $4) RETURNING id, created_at`,
+		req.ImgId, storage.StatusCreated, req.Width, req.Height,
+	).Scan(&jobId, &createdAt)
+
+	if err != nil {
+		return nil, err
+	}
+
+	return &storage.ResizeJobResponse{
+		Id:        jobId,
+		Status:    storage.StatusCreated,
+		CreatedAt: createdAt,
+	}, nil
+
+}

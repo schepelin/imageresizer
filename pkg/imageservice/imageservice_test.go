@@ -142,14 +142,8 @@ func TestImageService_ScheduleResizeJob(t *testing.T) {
 		Status: "CREATED",
 		CreatedAt: time.Date(1970, time.January, 0,0,0,0,0, time.UTC),
 	}
-	originalImage := storage.ImageModel{
-		Id:        imgId,
-		Raw:       []byte{10,15,42},
-		CreatedAt: time.Date(1970, time.January, 1, 0, 0, 0, 0, time.UTC),
-	}
 	expectedRequest := storage.ResizeJobRequest{imgId, w, h}
-	firstCall := mockStorage.EXPECT().Get(ctx, imgId).Return(&originalImage, nil)
-	mockStorage.EXPECT().CreateResizeJob(ctx, &expectedRequest).Return(&response, nil).After(firstCall)
+	mockStorage.EXPECT().CreateResizeJob(ctx, &expectedRequest).Return(&response, nil)
 
 	rj, err := is.ScheduleResizeJob(ctx, imgId, w, h)
 	assert.NoError(t, err)

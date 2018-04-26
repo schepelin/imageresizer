@@ -3,10 +3,15 @@ package storage
 import (
 	"context"
 	"time"
+	"errors"
 )
 
 //go:generate mockgen -source=storage.go -destination ../mocks/mock_storage.go -package mocks
 
+var (
+	ErrNoImageFound = errors.New("no image found")
+	StatusCreated = "CREATED"
+)
 type Storage interface {
 	Create(ctx context.Context, model *ImageModel) error
 	Get(ctx context.Context, id string) (*ImageModel, error)
