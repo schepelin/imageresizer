@@ -58,7 +58,7 @@ func (ps *PostgresStorage) Delete(ctx context.Context, id string) error {
 func (ps *PostgresStorage) CreateResizeJob(ctx context.Context,
 	req *storage.ResizeJobRequest) (*storage.ResizeJobResponse, error) {
 	var err error
-	var imageExists bool
+	var rawImg string
 	var createdAt time.Time
 	var jobId uint64
 	tx, err := ps.DB.Begin()
@@ -70,12 +70,12 @@ func (ps *PostgresStorage) CreateResizeJob(ctx context.Context,
 		err = tx.Commit()
 	}()
 
-	err = tx.QueryRow("SELECT exists(SELECT 1 FROM images where id=$1)", req.ImgId).Scan(&imageExists)
-	if err != nil {
-		return nil, err
-	}
-	if !imageExists {
+	err = tx.QueryRow("SELECT raw FROM images where id=$1", req.ImgId).Scan(&rawImg)
+	switch {
+	case err == sql.ErrNoRows:
 		return nil, storage.ErrNoImageFound
+	case err != nil:
+		return nil, err
 	}
 	err = tx.QueryRow(
 		`INSERT INTO resize_jobs(image_id, status, width, height)
@@ -91,6 +91,18 @@ func (ps *PostgresStorage) CreateResizeJob(ctx context.Context,
 		Id:        jobId,
 		Status:    storage.StatusCreated,
 		CreatedAt: createdAt,
+		RawImg: []byte(rawImg),
 	}, nil
 
+}
+
+func (ps *PostgresStorage) WriteResizeJobResult(ctx context.Context, req *storage.ResizeResultRequest) error {
+	var err error
+	_, err = ps.DB.Exec(
+		"UPDATE resize_jobs SET status = $1, raw = $2 WHERE id=$3",
+		storage.StatusFinished,
+		string(req.Raw),
+		req.JobId,
+	)
+	return err
 }

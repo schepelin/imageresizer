@@ -13,6 +13,7 @@ import (
 	"log"
 	"net/http"
 	"os"
+	"github.com/schepelin/imageresizer/pkg/resizesvc"
 )
 
 func createSampleImage() []byte {
@@ -40,8 +41,8 @@ func main() {
 	h := resizer.HasherMD5{}
 	cl := resizer.ClockUTC{}
 	cnv := resizer.ConverterPNG{}
-
-	is := imageservice.NewImageService(ps, cl, h, cnv)
+	rSvc := resizesvc.NewResizeService(ps, cnv)
+	is := imageservice.NewImageService(ps, cl, h, cnv, rSvc)
 
 	handler := imageservice.MakeHTTPHandler(is)
 	logger.Fatal(http.ListenAndServe(":8080", handler))
