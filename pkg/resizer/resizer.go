@@ -62,7 +62,6 @@ func (cnv ConverterPNG) Transform(raw *[]byte) (image.Image, error) {
 	return img, nil
 }
 
-
 type HasherMD5 struct {}
 
 func (h HasherMD5) Gen(raw *[]byte) string {
