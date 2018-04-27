@@ -55,6 +55,18 @@ func EncodeImageResponse(ctx context.Context, w http.ResponseWriter, response in
 	return err
 }
 
+func DecodeScheduleResizeJobRequest(ctx context.Context, r *http.Request) (interface{}, error) {
+	vars := mux.Vars(r)
+	imgId, ok := vars["id"]
+	if !ok {
+		return nil, InconsistentRoute
+	}
+	var req createResizeRequest
+	err := json.NewDecoder(r.Body).Decode(&req)
+	req.ImgId = imgId
+	return req, err
+}
+
 func MakeHTTPHandler(is resizer.ImageService) http.Handler {
 	r := mux.NewRouter()
 	e := MakeServerEndpoint(is)
@@ -71,6 +83,11 @@ func MakeHTTPHandler(is resizer.ImageService) http.Handler {
 	r.Methods("DELETE").Path("/images/{id}").Handler(httptransport.NewServer(
 		e.DeleteImageEndpoint,
 		DecodeDeleteImageRequest,
+		httptransport.EncodeJSONResponse,
+	))
+	r.Methods("POST").Path("/images/{id}/jobs").Handler(httptransport.NewServer(
+		e.ScheduleResizeJobEndpoint,
+		DecodeScheduleResizeJobRequest,
 		httptransport.EncodeJSONResponse,
 	))
 	return r

@@ -5,6 +5,7 @@ import (
 	"database/sql"
 	"fmt"
 	"github.com/schepelin/imageresizer/pkg/migrations"
+	"github.com/schepelin/imageresizer/pkg/resizer"
 	"github.com/schepelin/imageresizer/pkg/storage"
 	"github.com/stretchr/testify/assert"
 	"golang.org/x/net/context"
@@ -196,7 +197,7 @@ func TestPostgresStorage_CreateResizeJob(t *testing.T) {
 	}
 	resp, err := ps.CreateResizeJob(ctx, &req)
 	assert.NoError(t, err)
-	assert.Equal(t, storage.StatusCreated, resp.Status)
+	assert.Equal(t, resizer.StatusCreated, resp.Status)
 
 	var jobId uint64
 	var createdAt time.Time
@@ -223,4 +224,33 @@ func TestPostgresStorage_CreateResizeJob_ThereIsNoImage(t *testing.T) {
 	}
 	_, err := ps.CreateResizeJob(ctx, &req)
 	assert.Equal(t, storage.ErrNoImageFound, err)
+}
+func TestPostgresStorage_WriteResizeJobResult(t *testing.T) {
+	var deps dependencies
+	defer preparator(t, &deps)()
+	ps := PostgresStorage{deps.db}
+	ctx := context.TODO()
+
+	imgId, raw, createdAt := getImageRowDataDummy()
+	ps.DB.Exec("INSERT INTO images(id, raw, created_at) VALUES ($1, $2, $3)", imgId, raw, createdAt)
+	expectedRaw := []byte{1, 2, 3}
+	var jobId uint64
+	imgSize := 100
+	err := ps.DB.QueryRow(
+		`INSERT INTO resize_jobs(image_id, status, width, height) VALUES ($1, $2, $3, $3) RETURNING id`,
+		imgId, resizer.StatusCreated, imgSize,
+	).Scan(&jobId)
+	if err != nil {
+		t.Error(err.Error())
+	}
+
+	ps.WriteResizeJobResult(ctx, &storage.ResizeResultRequest{jobId, expectedRaw})
+	var actualStatus string
+	var actualRaw string
+	err = ps.DB.QueryRow("SELECT status, raw FROM resize_jobs WHERE id=$1", jobId).Scan(&actualStatus, &actualRaw)
+
+	assert.NoError(t, err)
+	assert.Equal(t, resizer.StatusFinished, actualStatus)
+	assert.Equal(t, expectedRaw, []byte(actualRaw))
+
 }

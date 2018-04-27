@@ -10,8 +10,6 @@ import (
 
 var (
 	ErrNoImageFound = errors.New("no image found")
-	StatusCreated   = "CREATED"
-	StatusFinished  = "FINISHED"
 )
 
 type ResizeStorage interface {

@@ -4,6 +4,7 @@ import (
 	"context"
 	"database/sql"
 	_ "github.com/lib/pq"
+	"github.com/schepelin/imageresizer/pkg/resizer"
 	"github.com/schepelin/imageresizer/pkg/storage"
 	"time"
 )
@@ -80,7 +81,7 @@ func (ps *PostgresStorage) CreateResizeJob(ctx context.Context,
 	err = tx.QueryRow(
 		`INSERT INTO resize_jobs(image_id, status, width, height)
 				VALUES($1, $2, $3, $4) RETURNING id, created_at`,
-		req.ImgId, storage.StatusCreated, req.Width, req.Height,
+		req.ImgId, resizer.StatusCreated, req.Width, req.Height,
 	).Scan(&jobId, &createdAt)
 
 	if err != nil {
@@ -89,7 +90,7 @@ func (ps *PostgresStorage) CreateResizeJob(ctx context.Context,
 
 	return &storage.ResizeJobResponse{
 		Id:        jobId,
-		Status:    storage.StatusCreated,
+		Status:    resizer.StatusCreated,
 		CreatedAt: createdAt,
 		RawImg:    []byte(rawImg),
 	}, nil
@@ -100,7 +101,7 @@ func (ps *PostgresStorage) WriteResizeJobResult(ctx context.Context, req *storag
 	var err error
 	_, err = ps.DB.Exec(
 		"UPDATE resize_jobs SET status = $1, raw = $2 WHERE id=$3",
-		storage.StatusFinished,
+		resizer.StatusFinished,
 		string(req.Raw),
 		req.JobId,
 	)

@@ -15,7 +15,10 @@ import (
 //go:generate mockgen -source=resizer.go -destination ../mocks/mock_resizer.go -package mocks
 
 var (
-	ErrImgDecode = errors.New("could not decode image")
+	ErrImgDecode   = errors.New("could not decode image")
+	StatusCreated  = "CREATED"
+	StatusFinished = "FINISHED"
+	StatusFailed   = "FAILED"
 )
 
 type Image struct {
