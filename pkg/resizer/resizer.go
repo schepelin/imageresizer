@@ -29,7 +29,6 @@ type Image struct {
 
 type ResizeJob struct {
 	Id        uint64
-	ImageId   string
 	Status    string
 	Image     image.Image
 	CreatedAt time.Time
@@ -48,6 +47,7 @@ type ImageService interface {
 	Read(ctx context.Context, imgId string) (*Image, error)
 	Delete(ctx context.Context, imgId string) error
 	ScheduleResizeJob(ctx context.Context, imgId string, width, height uint) (*ResizeJob, error)
+	GetResizeJob(ctx context.Context, jobId uint64) (*ResizeJob, error)
 }
 
 type Clocker interface {

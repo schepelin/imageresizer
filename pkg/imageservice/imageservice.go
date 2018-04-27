@@ -93,10 +93,25 @@ func (is *ImageService) ScheduleResizeJob(ctx context.Context, imgId string, wid
 	})
 	return &resizer.ResizeJob{
 		Id:        resp.Id,
-		ImageId:   imgId,
 		Status:    resp.Status,
 		Image:     nil,
 		CreatedAt: resp.CreatedAt,
 	}, nil
+}
 
+func (is *ImageService) GetResizeJob(ctx context.Context, jobId uint64) (*resizer.ResizeJob, error) {
+	res, err := is.Storage.GetResizeJob(ctx, &storage.ResizeGetRequest{jobId})
+	if err != nil {
+		return nil, err
+	}
+	img, err := is.Converter.Transform(&res.RawImg)
+	if err != nil {
+		return nil, err
+	}
+	return &resizer.ResizeJob{
+		Id: res.Id,
+		Status: res.Status,
+		Image:img,
+		CreatedAt:res.CreatedAt,
+	}, nil
 }
