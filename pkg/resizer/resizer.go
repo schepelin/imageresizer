@@ -5,11 +5,11 @@ import (
 	"context"
 	"crypto/md5"
 	"encoding/hex"
+	"errors"
+	"github.com/nfnt/resize"
 	"image"
 	"image/png"
 	"time"
-	"errors"
-	"github.com/nfnt/resize"
 )
 
 //go:generate mockgen -source=resizer.go -destination ../mocks/mock_resizer.go -package mocks
@@ -25,18 +25,18 @@ type Image struct {
 }
 
 type ResizeJob struct {
-	Id uint64
-	ImageId string
-	Status string
-	Image image.Image
+	Id        uint64
+	ImageId   string
+	Status    string
+	Image     image.Image
 	CreatedAt time.Time
 	// TODO: extend the service object if necessary
 }
 
 type ResizeServiceRequest struct {
-	JobId uint64
+	JobId  uint64
 	RawImg []byte
-	Width uint
+	Width  uint
 	Height uint
 }
 
@@ -88,7 +88,7 @@ func (cnv ConverterPNG) Resize(img *image.Image, width, height uint) ([]byte, er
 	return buf.Bytes(), nil
 }
 
-type HasherMD5 struct {}
+type HasherMD5 struct{}
 
 func (h HasherMD5) Gen(raw *[]byte) string {
 	hash := md5.New()

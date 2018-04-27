@@ -91,7 +91,7 @@ func (ps *PostgresStorage) CreateResizeJob(ctx context.Context,
 		Id:        jobId,
 		Status:    storage.StatusCreated,
 		CreatedAt: createdAt,
-		RawImg: []byte(rawImg),
+		RawImg:    []byte(rawImg),
 	}, nil
 
 }

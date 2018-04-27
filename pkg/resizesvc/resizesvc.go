@@ -1,18 +1,17 @@
 package resizesvc
 
 import (
-	"github.com/schepelin/imageresizer/pkg/storage"
-	"github.com/schepelin/imageresizer/pkg/resizer"
 	"context"
+	"github.com/schepelin/imageresizer/pkg/resizer"
+	"github.com/schepelin/imageresizer/pkg/storage"
 )
 
 type ResizeService struct {
-	Storage storage.ResizeStorage
+	Storage   storage.ResizeStorage
 	Converter resizer.Converter
 }
 
-
-func NewResizeService(s storage.ResizeStorage, cnv resizer.Converter) *ResizeService{
+func NewResizeService(s storage.ResizeStorage, cnv resizer.Converter) *ResizeService {
 	return &ResizeService{s, cnv}
 }
 

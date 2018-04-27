@@ -2,16 +2,16 @@ package storage
 
 import (
 	"context"
-	"time"
 	"errors"
+	"time"
 )
 
 //go:generate mockgen -source=storage.go -destination ../mocks/mock_storage.go -package mocks
 
 var (
 	ErrNoImageFound = errors.New("no image found")
-	StatusCreated = "CREATED"
-	StatusFinished = "FINISHED"
+	StatusCreated   = "CREATED"
+	StatusFinished  = "FINISHED"
 )
 
 type ResizeStorage interface {
@@ -34,18 +34,18 @@ type ImageModel struct {
 }
 
 type ResizeJobRequest struct {
-	ImgId string
-	Width uint
+	ImgId  string
+	Width  uint
 	Height uint
 }
 
 type ResizeJobResponse struct {
-	Id uint64
-	Status string
+	Id        uint64
+	Status    string
 	CreatedAt time.Time
-	RawImg []byte
+	RawImg    []byte
 }
 type ResizeResultRequest struct {
 	JobId uint64
-	Raw []byte
+	Raw   []byte
 }

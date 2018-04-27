@@ -7,13 +7,13 @@ import (
 	"github.com/schepelin/imageresizer/pkg/imageservice"
 	"github.com/schepelin/imageresizer/pkg/postgres"
 	"github.com/schepelin/imageresizer/pkg/resizer"
+	"github.com/schepelin/imageresizer/pkg/resizesvc"
 	"image"
 	"image/color"
 	"image/png"
 	"log"
 	"net/http"
 	"os"
-	"github.com/schepelin/imageresizer/pkg/resizesvc"
 )
 
 func createSampleImage() []byte {

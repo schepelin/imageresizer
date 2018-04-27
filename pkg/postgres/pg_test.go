@@ -181,7 +181,6 @@ func TestPostgresStorage_Create(t *testing.T) {
 	assert.Equal(t, imgModel.CreatedAt, actualCreatedAt)
 }
 
-
 func TestPostgresStorage_CreateResizeJob(t *testing.T) {
 	var deps dependencies
 	defer preparator(t, &deps)()
@@ -191,8 +190,8 @@ func TestPostgresStorage_CreateResizeJob(t *testing.T) {
 	ps.DB.Exec("INSERT INTO images(id, raw, created_at) VALUES ($1, $2, $3)", imgId, raw, imgCreatedAt)
 
 	req := storage.ResizeJobRequest{
-		ImgId: imgId,
-		Width: 10,
+		ImgId:  imgId,
+		Width:  10,
 		Height: 20,
 	}
 	resp, err := ps.CreateResizeJob(ctx, &req)
@@ -218,8 +217,8 @@ func TestPostgresStorage_CreateResizeJob_ThereIsNoImage(t *testing.T) {
 	ps := PostgresStorage{deps.db}
 	ctx := context.TODO()
 	req := storage.ResizeJobRequest{
-		ImgId: "there_is_no_such_image",
-		Width: 10,
+		ImgId:  "there_is_no_such_image",
+		Width:  10,
 		Height: 20,
 	}
 	_, err := ps.CreateResizeJob(ctx, &req)

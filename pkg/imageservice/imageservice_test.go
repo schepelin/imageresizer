@@ -144,9 +144,9 @@ func TestImageService_ScheduleResizeJob(t *testing.T) {
 	is := NewImageService(mockStorage, mockClocker, mockHasher, mockConverter, mockResize)
 
 	response := storage.ResizeJobResponse{
-		Id: 100500,
-		Status: "CREATED",
-		CreatedAt: time.Date(1970, time.January, 0,0,0,0,0, time.UTC),
+		Id:        100500,
+		Status:    "CREATED",
+		CreatedAt: time.Date(1970, time.January, 0, 0, 0, 0, 0, time.UTC),
 	}
 	expectedRequest := storage.ResizeJobRequest{imgId, w, h}
 	mockStorage.EXPECT().CreateResizeJob(ctx, &expectedRequest).Return(&response, nil)
