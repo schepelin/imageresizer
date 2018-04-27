@@ -107,3 +107,20 @@ func (ps *PostgresStorage) WriteResizeJobResult(ctx context.Context, req *storag
 	)
 	return err
 }
+
+func (ps *PostgresStorage) GetResizeJob(
+	ctx context.Context, req *storage.ResizeGetRequest) (*storage.ResizeJobResponse, error) {
+	var resp storage.ResizeJobResponse
+	var rawImg string
+
+	err := ps.DB.QueryRow(
+		"SELECT status, raw, created_at FROM resize_jobs WHERE id=$1", req.JobId,
+	).Scan(&resp.Status, &rawImg, &resp.CreatedAt)
+
+	if err != nil {
+		return nil, err
+	}
+	resp.Id = req.JobId
+	resp.RawImg = []byte(rawImg)
+	return &resp, nil
+}

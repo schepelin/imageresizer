@@ -75,7 +75,7 @@ func (mr *MockImageServiceMockRecorder) Delete(ctx, imgId interface{}) *gomock.C
 }
 
 // ScheduleResizeJob mocks base method
-func (m *MockImageService) ScheduleResizeJob(ctx context.Context, imgId string, width, height uint32) (*resizer.ResizeJob, error) {
+func (m *MockImageService) ScheduleResizeJob(ctx context.Context, imgId string, width, height uint) (*resizer.ResizeJob, error) {
 	ret := m.ctrl.Call(m, "ScheduleResizeJob", ctx, imgId, width, height)
 	ret0, _ := ret[0].(*resizer.ResizeJob)
 	ret1, _ := ret[1].(error)

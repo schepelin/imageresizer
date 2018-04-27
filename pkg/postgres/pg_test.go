@@ -254,3 +254,27 @@ func TestPostgresStorage_WriteResizeJobResult(t *testing.T) {
 	assert.Equal(t, expectedRaw, []byte(actualRaw))
 
 }
+
+func TestPostgresStorage_GetResizeJob(t *testing.T) {
+	var deps dependencies
+	defer preparator(t, &deps)()
+	ps := PostgresStorage{deps.db}
+	ctx := context.TODO()
+
+	imgId, raw, createdAt := getImageRowDataDummy()
+	ps.DB.Exec("INSERT INTO images(id, raw, created_at) VALUES ($1, $2, $3)", imgId, raw, createdAt)
+	expectedRaw := []byte{1, 2, 3}
+	var jobId uint64
+	imgSize := 100
+	err := ps.DB.QueryRow(
+		`INSERT INTO resize_jobs(image_id, status, width, height, raw) VALUES ($1, $2, $3, $3, $4) RETURNING id`,
+		imgId, resizer.StatusCreated, imgSize, string(expectedRaw),
+	).Scan(&jobId)
+
+	assert.NoError(t, err)
+
+	jobRes, err := ps.GetResizeJob(ctx, &storage.ResizeGetRequest{JobId: jobId})
+	assert.NoError(t, err)
+	assert.Equal(t, jobId, jobRes.Id)
+	assert.Equal(t, expectedRaw, jobRes.RawImg)
+}

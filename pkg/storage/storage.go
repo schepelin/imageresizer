@@ -23,6 +23,7 @@ type Storage interface {
 	Get(ctx context.Context, id string) (*ImageModel, error)
 	Delete(ctx context.Context, id string) error
 	CreateResizeJob(ctx context.Context, req *ResizeJobRequest) (*ResizeJobResponse, error)
+	GetResizeJob(ctx context.Context, req *ResizeGetRequest) (*ResizeJobResponse, error)
 }
 
 type ImageModel struct {
@@ -43,6 +44,11 @@ type ResizeJobResponse struct {
 	CreatedAt time.Time
 	RawImg    []byte
 }
+
+type ResizeGetRequest struct {
+	JobId uint64
+}
+
 type ResizeResultRequest struct {
 	JobId uint64
 	Raw   []byte

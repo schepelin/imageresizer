@@ -130,3 +130,16 @@ func (m *MockStorage) CreateResizeJob(ctx context.Context, req *storage.ResizeJo
 func (mr *MockStorageMockRecorder) CreateResizeJob(ctx, req interface{}) *gomock.Call {
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "CreateResizeJob", reflect.TypeOf((*MockStorage)(nil).CreateResizeJob), ctx, req)
 }
+
+// GetResizeJob mocks base method
+func (m *MockStorage) GetResizeJob(ctx context.Context, req *storage.ResizeGetRequest) (*storage.ResizeJobResponse, error) {
+	ret := m.ctrl.Call(m, "GetResizeJob", ctx, req)
+	ret0, _ := ret[0].(*storage.ResizeJobResponse)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// GetResizeJob indicates an expected call of GetResizeJob
+func (mr *MockStorageMockRecorder) GetResizeJob(ctx, req interface{}) *gomock.Call {
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetResizeJob", reflect.TypeOf((*MockStorage)(nil).GetResizeJob), ctx, req)
+}
