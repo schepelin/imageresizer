@@ -16,6 +16,7 @@ import (
 
 var (
 	ErrImgDecode   = errors.New("could not decode image")
+	ErrNoImage	   = errors.New("no image found")
 	StatusCreated  = "CREATED"
 	StatusFinished = "FINISHED"
 	StatusFailed   = "FAILED"

@@ -117,9 +117,14 @@ func (ps *PostgresStorage) GetResizeJob(
 		"SELECT status, raw, created_at FROM resize_jobs WHERE id=$1", req.JobId,
 	).Scan(&resp.Status, &rawImg, &resp.CreatedAt)
 
-	if err != nil {
+	switch {
+	case err == sql.ErrNoRows:
+		return nil, resizer.ErrNoImage
+
+	case err != nil:
 		return nil, err
 	}
+
 	resp.Id = req.JobId
 	resp.RawImg = []byte(rawImg)
 	return &resp, nil

@@ -46,6 +46,15 @@ type createResizeResponse struct {
 	CreatedAt time.Time `json:"created_at"`
 }
 
+type getResizeJobRequest struct {
+	JobId uint64
+}
+
+type getResizeJobResponse struct {
+	Img image.Image
+	Err error
+}
+
 func MakeCreateImageEndpoint(svc resizer.ImageService) endpoint.Endpoint {
 	return func(ctx context.Context, request interface{}) (interface{}, error) {
 		req := request.(createImageRequest)
@@ -90,11 +99,23 @@ func MakeScheduleResizeJobEndpoint(svc resizer.ImageService) endpoint.Endpoint {
 	}
 }
 
+func MakeGetResizeJobEndpoint(svc resizer.ImageService) endpoint.Endpoint {
+	return func(ctx context.Context, request interface{}) (interface{}, error) {
+		req := request.(getResizeJobRequest)
+		job, err := svc.GetResizeJob(ctx, req.JobId)
+		if err != nil {
+			return getResizeJobResponse{nil, resizer.ErrNoImage}, nil
+		}
+		return getResizeJobResponse{job.Image, nil}, nil
+	}
+}
+
 type Endpoints struct {
 	CreateImageEndpoint       endpoint.Endpoint
 	GetImageEndpoint          endpoint.Endpoint
 	DeleteImageEndpoint       endpoint.Endpoint
 	ScheduleResizeJobEndpoint endpoint.Endpoint
+	GetResizeJobEndpoint      endpoint.Endpoint
 }
 
 func MakeServerEndpoint(svc resizer.ImageService) Endpoints {
@@ -103,5 +124,6 @@ func MakeServerEndpoint(svc resizer.ImageService) Endpoints {
 		GetImageEndpoint:          MakeGetImageEndpoint(svc),
 		DeleteImageEndpoint:       MakeDeleteImageEndpoint(svc),
 		ScheduleResizeJobEndpoint: MakeScheduleResizeJobEndpoint(svc),
+		GetResizeJobEndpoint:	   MakeGetResizeJobEndpoint(svc),
 	}
 }
