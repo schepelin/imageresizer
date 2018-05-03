@@ -1,39 +1,23 @@
 package main
 
 import (
-	"bytes"
+	"context"
 	"database/sql"
-	"fmt"
-	"github.com/schepelin/imageresizer/pkg/imageservice"
 	"github.com/schepelin/imageresizer/pkg/postgres"
 	"github.com/schepelin/imageresizer/pkg/rabbitmq"
 	"github.com/schepelin/imageresizer/pkg/resizer"
 	"github.com/schepelin/imageresizer/pkg/resizesvc"
 	"github.com/streadway/amqp"
-	"image"
-	"image/color"
-	"image/png"
 	"log"
-	"net/http"
 	"os"
+	"os/signal"
 )
 
-func createSampleImage() []byte {
-	img := image.NewRGBA(image.Rect(0, 0, 10, 10))
-	img.Set(2, 1, color.RGBA{255, 0, 0, 255})
-	buf := new(bytes.Buffer)
-	err := png.Encode(buf, img)
-	if err != nil {
-		fmt.Println("Failed to encode png", err)
-	}
-	return buf.Bytes()
-}
-
 func main() {
-	var err error
-	logger := log.New(os.Stdout, "", log.LstdFlags)
 	const dbConnect string = "postgres://localhost/image_resizer?sslmode=disable"
 	const mqConnect string = "amqp://guest:guest@localhost:5672/"
+
+	logger := log.New(os.Stdout, "", log.LstdFlags)
 
 	conn, err := amqp.Dial(mqConnect)
 	if err != nil {
@@ -69,12 +53,15 @@ func main() {
 	defer db.Close()
 
 	ps := postgres.NewPostgresStorage(db)
-	h := resizer.HasherMD5{}
-	cl := resizer.ClockUTC{}
 	cnv := resizer.ConverterPNG{}
 	rSvc := resizesvc.NewResizeService(ps, cnv, pubSub)
-	is := imageservice.NewImageService(ps, cl, h, cnv, rSvc)
 
-	handler := imageservice.MakeHTTPHandler(is)
-	logger.Fatal(http.ListenAndServe(":8080", handler))
+	ch := make(chan uint64)
+	rSvc.RunResizeWorker(context.Background(), ch)
+
+	signalChan := make(chan os.Signal, 1)
+	signal.Notify(signalChan, os.Interrupt, os.Kill)
+	<-signalChan
+	close(ch)
+
 }

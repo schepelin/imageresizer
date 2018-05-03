@@ -103,5 +103,6 @@ func (h HasherMD5) Gen(raw *[]byte) string {
 
 type ResizeService interface {
 	SendResizeJob(ctx context.Context, req *ResizeServiceRequest) error
+	RunResizeWorker(ctx context.Context, ch chan uint64) error
 	// ResizeSync(ctx context.Context, raw *[]byte) (image.Image, error)
 }

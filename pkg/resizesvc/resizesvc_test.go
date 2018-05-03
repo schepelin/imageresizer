@@ -1,10 +1,8 @@
 package resizesvc
 
 import (
-	"context"
 	"github.com/golang/mock/gomock"
 	"github.com/schepelin/imageresizer/pkg/mocks"
-	"github.com/schepelin/imageresizer/pkg/resizer"
 	"github.com/stretchr/testify/assert"
 	"image"
 	"image/color"
@@ -24,41 +22,41 @@ func TestNewResizeService(t *testing.T) {
 
 	mockResizeStorage := mocks.NewMockResizeStorage(mockCtrl)
 	mockConverter := mocks.NewMockConverter(mockCtrl)
-	mockPublisher := mocks.NewMockPublisher(mockCtrl)
+	mockPubSub := mocks.NewMockPublisherConsumer(mockCtrl)
 
-	rs := NewResizeService(mockResizeStorage, mockConverter, mockPublisher)
+	rs := NewResizeService(mockResizeStorage, mockConverter, mockPubSub)
 	assert.Equal(t, mockConverter, rs.Converter)
 	assert.Equal(t, mockResizeStorage, rs.Storage)
 }
 
-func TestResizeService_ResizeAsync(t *testing.T) {
-	mockCtrl := gomock.NewController(t)
-	defer mockCtrl.Finish()
-
-	mockStorage := mocks.NewMockResizeStorage(mockCtrl)
-	mockConverter := mocks.NewMockConverter(mockCtrl)
-	mockPublisher := mocks.NewMockPublisher(mockCtrl)
-	ctx := context.TODO()
-
-	rs := NewResizeService(mockStorage, mockConverter, mockPublisher)
-
-	req := resizer.ResizeServiceRequest{
-		JobId:  100500,
-		RawImg: []byte{1, 2, 3},
-		Width:  20,
-		Height: 10,
-	}
-	//imgSample := createSampleImage()
-	//resizeRaw := []byte{4, 5, 6}
-	//storageReq := storage.ResizeResultRequest{req.JobId, resizeRaw}
-
-	mockPublisher.EXPECT().PublishResizeJob(ctx, req.JobId).Return(nil)
-	//gomock.InOrder(
-	//	mockConverter.EXPECT().Transform(&req.RawImg).Return(imgSample, nil),
-	//	mockConverter.EXPECT().Resize(&imgSample, req.Width, req.Height).Return(resizeRaw, nil),
-	//	mockStorage.EXPECT().WriteResizeJobResult(ctx, &storageReq).Return(nil),
-	//)
-
-	err := rs.ResizeAsync(ctx, &req)
-	assert.NoError(t, err)
-}
+//func TestResizeService_ResizeAsync(t *testing.T) {
+//	mockCtrl := gomock.NewController(t)
+//	defer mockCtrl.Finish()
+//
+//	mockStorage := mocks.NewMockResizeStorage(mockCtrl)
+//	mockConverter := mocks.NewMockConverter(mockCtrl)
+//	mockPubSub := mocks.NewMockPublisherConsumer(mockCtrl)
+//	ctx := context.TODO()
+//
+//	rs := NewResizeService(mockStorage, mockConverter, mockPubSub)
+//
+//	req := resizer.ResizeServiceRequest{
+//		JobId:  100500,
+//		RawImg: []byte{1, 2, 3},
+//		Width:  20,
+//		Height: 10,
+//	}
+//	//imgSample := createSampleImage()
+//	//resizeRaw := []byte{4, 5, 6}
+//	//storageReq := storage.ResizeResultRequest{req.JobId, resizeRaw}
+//
+//	mockPubSub.EXPECT().PublishResizeJob(ctx, req.JobId).Return(nil)
+//	//gomock.InOrder(
+//	//	mockConverter.EXPECT().Transform(&req.RawImg).Return(imgSample, nil),
+//	//	mockConverter.EXPECT().Resize(&imgSample, req.Width, req.Height).Return(resizeRaw, nil),
+//	//	mockStorage.EXPECT().WriteResizeJobResult(ctx, &storageReq).Return(nil),
+//	//)
+//
+//	err := rs.RunResizeWorker(ctx, &req)
+//	assert.NoError(t, err)
+//}

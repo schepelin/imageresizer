@@ -15,6 +15,7 @@ var (
 type ResizeStorage interface {
 	WriteResizeJobResult(ctx context.Context, req *ResizeResultRequest) error
 	GetResizeJob(ctx context.Context, req *ResizeGetRequest) (*ResizeJobResponse, error)
+	GetResizeJobForUpdate(ctx context.Context, jobId uint64) (*GetResizeJobResponse, error)
 }
 
 type Storage interface {
@@ -52,4 +53,10 @@ type ResizeGetRequest struct {
 type ResizeResultRequest struct {
 	JobId uint64
 	Raw   []byte
+}
+
+type GetResizeJobResponse struct {
+	RawImg []byte
+	Width  uint
+	Height uint
 }

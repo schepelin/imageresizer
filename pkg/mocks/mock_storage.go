@@ -59,6 +59,19 @@ func (mr *MockResizeStorageMockRecorder) GetResizeJob(ctx, req interface{}) *gom
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetResizeJob", reflect.TypeOf((*MockResizeStorage)(nil).GetResizeJob), ctx, req)
 }
 
+// GetResizeJobForUpdate mocks base method
+func (m *MockResizeStorage) GetResizeJobForUpdate(ctx context.Context, jobId uint64) (*storage.GetResizeJobResponse, error) {
+	ret := m.ctrl.Call(m, "GetResizeJobForUpdate", ctx, jobId)
+	ret0, _ := ret[0].(*storage.GetResizeJobResponse)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// GetResizeJobForUpdate indicates an expected call of GetResizeJobForUpdate
+func (mr *MockResizeStorageMockRecorder) GetResizeJobForUpdate(ctx, jobId interface{}) *gomock.Call {
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetResizeJobForUpdate", reflect.TypeOf((*MockResizeStorage)(nil).GetResizeJobForUpdate), ctx, jobId)
+}
+
 // MockStorage is a mock of Storage interface
 type MockStorage struct {
 	ctrl     *gomock.Controller
@@ -105,6 +118,19 @@ func (m *MockStorage) GetResizeJob(ctx context.Context, req *storage.ResizeGetRe
 // GetResizeJob indicates an expected call of GetResizeJob
 func (mr *MockStorageMockRecorder) GetResizeJob(ctx, req interface{}) *gomock.Call {
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetResizeJob", reflect.TypeOf((*MockStorage)(nil).GetResizeJob), ctx, req)
+}
+
+// GetResizeJobForUpdate mocks base method
+func (m *MockStorage) GetResizeJobForUpdate(ctx context.Context, jobId uint64) (*storage.GetResizeJobResponse, error) {
+	ret := m.ctrl.Call(m, "GetResizeJobForUpdate", ctx, jobId)
+	ret0, _ := ret[0].(*storage.GetResizeJobResponse)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// GetResizeJobForUpdate indicates an expected call of GetResizeJobForUpdate
+func (mr *MockStorageMockRecorder) GetResizeJobForUpdate(ctx, jobId interface{}) *gomock.Call {
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetResizeJobForUpdate", reflect.TypeOf((*MockStorage)(nil).GetResizeJobForUpdate), ctx, jobId)
 }
 
 // Create mocks base method

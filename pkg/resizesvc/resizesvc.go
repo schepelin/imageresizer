@@ -10,26 +10,44 @@ import (
 type ResizeService struct {
 	Storage   storage.ResizeStorage
 	Converter resizer.Converter
-	Publisher msgqueue.Publisher
+	PubSub    msgqueue.PublisherConsumer
 }
 
 func NewResizeService(
-	s storage.ResizeStorage, cnv resizer.Converter, pub msgqueue.Publisher) *ResizeService {
-	return &ResizeService{s, cnv, pub}
+	s storage.ResizeStorage, cnv resizer.Converter, pubsub msgqueue.PublisherConsumer) *ResizeService {
+	return &ResizeService{s, cnv, pubsub}
 }
 
-func (rs *ResizeService) ResizeAsync(ctx context.Context, req *resizer.ResizeServiceRequest) error {
+func (rs *ResizeService) SendResizeJob(ctx context.Context, req *resizer.ResizeServiceRequest) error {
 	var err error
 
-	err = rs.Publisher.PublishResizeJob(ctx, req.JobId)
-	//img, err := rs.Converter.Transform(&req.RawImg)
-	//if err != nil {
-	//	return err
-	//}
-	//resizeRaw, err := rs.Converter.Resize(&img, req.Width, req.Height)
-	//if err != nil {
-	//	return err
-	//}
-	//err = rs.Storage.WriteResizeJobResult(ctx, &storage.ResizeResultRequest{req.JobId, resizeRaw})
+	err = rs.PubSub.PublishResizeJob(ctx, req.JobId)
 	return err
+}
+
+func (rs *ResizeService) RunResizeWorker(ctx context.Context, ch chan uint64) error {
+	go rs.PubSub.ConsumeResizeJobs(ctx, ch)
+
+	for jobId := range ch {
+		resp, err := rs.Storage.GetResizeJobForUpdate(ctx, jobId)
+		if err != nil {
+			return err
+		}
+		img, err := rs.Converter.Transform(&resp.RawImg)
+		if err != nil {
+			return err
+		}
+		raw, err := rs.Converter.Resize(&img, resp.Width, resp.Height)
+
+		if err != nil {
+			return err
+		}
+		rs.Storage.WriteResizeJobResult(ctx, &storage.ResizeResultRequest{
+			jobId,
+			raw,
+		})
+
+	}
+
+	return nil
 }

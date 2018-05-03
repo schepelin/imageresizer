@@ -161,7 +161,7 @@ func AssetNames() []string {
 
 // _bindata is a table, holding each asset generator, mapped to its name.
 var _bindata = map[string]func() (*asset, error){
-	"migrations/20180423103837-images_table_added.sql": migrations20180423103837Images_table_addedSql,
+	"migrations/20180423103837-images_table_added.sql":      migrations20180423103837Images_table_addedSql,
 	"migrations/20180426193723-resize_jobs_table_added.sql": migrations20180426193723Resize_jobs_table_addedSql,
 }
 
@@ -204,9 +204,10 @@ type bintree struct {
 	Func     func() (*asset, error)
 	Children map[string]*bintree
 }
+
 var _bintree = &bintree{nil, map[string]*bintree{
 	"migrations": &bintree{nil, map[string]*bintree{
-		"20180423103837-images_table_added.sql": &bintree{migrations20180423103837Images_table_addedSql, map[string]*bintree{}},
+		"20180423103837-images_table_added.sql":      &bintree{migrations20180423103837Images_table_addedSql, map[string]*bintree{}},
 		"20180426193723-resize_jobs_table_added.sql": &bintree{migrations20180426193723Resize_jobs_table_addedSql, map[string]*bintree{}},
 	}},
 }}
@@ -257,4 +258,3 @@ func _filePath(dir, name string) string {
 	cannonicalName := strings.Replace(name, "\\", "/", -1)
 	return filepath.Join(append([]string{dir}, strings.Split(cannonicalName, "/")...)...)
 }
-

@@ -253,3 +253,15 @@ func (m *MockResizeService) SendResizeJob(ctx context.Context, req *resizer.Resi
 func (mr *MockResizeServiceMockRecorder) SendResizeJob(ctx, req interface{}) *gomock.Call {
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "SendResizeJob", reflect.TypeOf((*MockResizeService)(nil).SendResizeJob), ctx, req)
 }
+
+// RunResizeWorker mocks base method
+func (m *MockResizeService) RunResizeWorker(ctx context.Context, ch chan uint64) error {
+	ret := m.ctrl.Call(m, "RunResizeWorker", ctx, ch)
+	ret0, _ := ret[0].(error)
+	return ret0
+}
+
+// RunResizeWorker indicates an expected call of RunResizeWorker
+func (mr *MockResizeServiceMockRecorder) RunResizeWorker(ctx, ch interface{}) *gomock.Call {
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "RunResizeWorker", reflect.TypeOf((*MockResizeService)(nil).RunResizeWorker), ctx, ch)
+}

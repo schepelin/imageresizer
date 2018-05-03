@@ -16,7 +16,7 @@ type Publisher interface {
 }
 
 type Consumer interface {
-	ConsumeResizeJob(ctx context.Context, jobId uint64) error
+	ConsumeResizeJobs(ctx context.Context, ch chan<- uint64) error
 }
 
 type PublisherConsumer interface {

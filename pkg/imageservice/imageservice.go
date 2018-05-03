@@ -85,12 +85,15 @@ func (is *ImageService) ScheduleResizeJob(ctx context.Context, imgId string, wid
 		return nil, err
 	}
 
-	is.ResizeSvc.SendResizeJob(ctx, &resizer.ResizeServiceRequest{
+	err = is.ResizeSvc.SendResizeJob(ctx, &resizer.ResizeServiceRequest{
 		JobId:  resp.Id,
 		RawImg: resp.RawImg,
 		Width:  req.Width,
 		Height: req.Height,
 	})
+	if err != nil {
+		return nil, err
+	}
 	return &resizer.ResizeJob{
 		Id:        resp.Id,
 		Status:    resp.Status,

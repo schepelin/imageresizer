@@ -68,16 +68,16 @@ func (m *MockConsumer) EXPECT() *MockConsumerMockRecorder {
 	return m.recorder
 }
 
-// ConsumeResizeJob mocks base method
-func (m *MockConsumer) ConsumeResizeJob(ctx context.Context, jobId uint64) error {
-	ret := m.ctrl.Call(m, "ConsumeResizeJob", ctx, jobId)
+// ConsumeResizeJobs mocks base method
+func (m *MockConsumer) ConsumeResizeJobs(ctx context.Context, ch chan<- uint64) error {
+	ret := m.ctrl.Call(m, "ConsumeResizeJobs", ctx, ch)
 	ret0, _ := ret[0].(error)
 	return ret0
 }
 
-// ConsumeResizeJob indicates an expected call of ConsumeResizeJob
-func (mr *MockConsumerMockRecorder) ConsumeResizeJob(ctx, jobId interface{}) *gomock.Call {
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ConsumeResizeJob", reflect.TypeOf((*MockConsumer)(nil).ConsumeResizeJob), ctx, jobId)
+// ConsumeResizeJobs indicates an expected call of ConsumeResizeJobs
+func (mr *MockConsumerMockRecorder) ConsumeResizeJobs(ctx, ch interface{}) *gomock.Call {
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ConsumeResizeJobs", reflect.TypeOf((*MockConsumer)(nil).ConsumeResizeJobs), ctx, ch)
 }
 
 // MockPublisherConsumer is a mock of PublisherConsumer interface
@@ -115,14 +115,14 @@ func (mr *MockPublisherConsumerMockRecorder) PublishResizeJob(ctx, jobId interfa
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "PublishResizeJob", reflect.TypeOf((*MockPublisherConsumer)(nil).PublishResizeJob), ctx, jobId)
 }
 
-// ConsumeResizeJob mocks base method
-func (m *MockPublisherConsumer) ConsumeResizeJob(ctx context.Context, jobId uint64) error {
-	ret := m.ctrl.Call(m, "ConsumeResizeJob", ctx, jobId)
+// ConsumeResizeJobs mocks base method
+func (m *MockPublisherConsumer) ConsumeResizeJobs(ctx context.Context, ch chan<- uint64) error {
+	ret := m.ctrl.Call(m, "ConsumeResizeJobs", ctx, ch)
 	ret0, _ := ret[0].(error)
 	return ret0
 }
 
-// ConsumeResizeJob indicates an expected call of ConsumeResizeJob
-func (mr *MockPublisherConsumerMockRecorder) ConsumeResizeJob(ctx, jobId interface{}) *gomock.Call {
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ConsumeResizeJob", reflect.TypeOf((*MockPublisherConsumer)(nil).ConsumeResizeJob), ctx, jobId)
+// ConsumeResizeJobs indicates an expected call of ConsumeResizeJobs
+func (mr *MockPublisherConsumerMockRecorder) ConsumeResizeJobs(ctx, ch interface{}) *gomock.Call {
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ConsumeResizeJobs", reflect.TypeOf((*MockPublisherConsumer)(nil).ConsumeResizeJobs), ctx, ch)
 }
