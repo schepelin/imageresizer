@@ -150,7 +150,7 @@ func TestImageService_ScheduleResizeJob(t *testing.T) {
 	}
 	expectedRequest := storage.ResizeJobRequest{imgId, w, h}
 	mockStorage.EXPECT().CreateResizeJob(ctx, &expectedRequest).Return(&response, nil)
-	mockResize.EXPECT().ResizeAsync(ctx, gomock.Any()).Return(nil)
+	mockResize.EXPECT().SendResizeJob(ctx, gomock.Any()).Return(nil)
 	rj, err := is.ScheduleResizeJob(ctx, imgId, w, h)
 	assert.NoError(t, err)
 
@@ -176,10 +176,10 @@ func TestImageService_GetResizeJob(t *testing.T) {
 	var jobId uint64 = 100500
 	imgSample := createSampleImage()
 	resp := storage.ResizeJobResponse{
-		Id: jobId,
-		Status: "CREATED",
+		Id:        jobId,
+		Status:    "CREATED",
 		CreatedAt: time.Date(1970, time.January, 0, 0, 0, 0, 0, time.UTC),
-		RawImg: []byte{1,2,3},
+		RawImg:    []byte{1, 2, 3},
 	}
 
 	gomock.InOrder(

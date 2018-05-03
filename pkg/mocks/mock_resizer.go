@@ -87,6 +87,19 @@ func (mr *MockImageServiceMockRecorder) ScheduleResizeJob(ctx, imgId, width, hei
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ScheduleResizeJob", reflect.TypeOf((*MockImageService)(nil).ScheduleResizeJob), ctx, imgId, width, height)
 }
 
+// GetResizeJob mocks base method
+func (m *MockImageService) GetResizeJob(ctx context.Context, jobId uint64) (*resizer.ResizeJob, error) {
+	ret := m.ctrl.Call(m, "GetResizeJob", ctx, jobId)
+	ret0, _ := ret[0].(*resizer.ResizeJob)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// GetResizeJob indicates an expected call of GetResizeJob
+func (mr *MockImageServiceMockRecorder) GetResizeJob(ctx, jobId interface{}) *gomock.Call {
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetResizeJob", reflect.TypeOf((*MockImageService)(nil).GetResizeJob), ctx, jobId)
+}
+
 // MockClocker is a mock of Clocker interface
 type MockClocker struct {
 	ctrl     *gomock.Controller
@@ -229,14 +242,14 @@ func (m *MockResizeService) EXPECT() *MockResizeServiceMockRecorder {
 	return m.recorder
 }
 
-// ResizeAsync mocks base method
-func (m *MockResizeService) ResizeAsync(ctx context.Context, req *resizer.ResizeServiceRequest) error {
-	ret := m.ctrl.Call(m, "ResizeAsync", ctx, req)
+// SendResizeJob mocks base method
+func (m *MockResizeService) SendResizeJob(ctx context.Context, req *resizer.ResizeServiceRequest) error {
+	ret := m.ctrl.Call(m, "SendResizeJob", ctx, req)
 	ret0, _ := ret[0].(error)
 	return ret0
 }
 
-// ResizeAsync indicates an expected call of ResizeAsync
-func (mr *MockResizeServiceMockRecorder) ResizeAsync(ctx, req interface{}) *gomock.Call {
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ResizeAsync", reflect.TypeOf((*MockResizeService)(nil).ResizeAsync), ctx, req)
+// SendResizeJob indicates an expected call of SendResizeJob
+func (mr *MockResizeServiceMockRecorder) SendResizeJob(ctx, req interface{}) *gomock.Call {
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "SendResizeJob", reflect.TypeOf((*MockResizeService)(nil).SendResizeJob), ctx, req)
 }

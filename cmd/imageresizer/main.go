@@ -14,6 +14,8 @@ import (
 	"log"
 	"net/http"
 	"os"
+	"github.com/streadway/amqp"
+	"github.com/schepelin/imageresizer/pkg/rabbitmq"
 )
 
 func createSampleImage() []byte {
@@ -31,17 +33,46 @@ func main() {
 	var err error
 	logger := log.New(os.Stdout, "", log.LstdFlags)
 	const dbConnect string = "postgres://localhost/image_resizer?sslmode=disable"
+	const mqConnect string = "amqp://guest:guest@localhost:5672/"
+
+	conn, err := amqp.Dial("amqp://guest:guest@localhost:5672/")
+	if err != nil {
+		logger.Panic("Could not connect to the amqp server")
+	}
+	defer conn.Close()
+	mqChannel, err := conn.Channel()
+	if err != nil {
+		logger.Panic("Could not create the channel")
+	}
+	mqCfg := rabbitmq.Config{
+		Queue: "test",
+		Exchange: "",
+	}
+	_, err = mqChannel.QueueDeclare(
+		mqCfg.Queue,
+		false,
+		false,
+		false,
+		false,
+		nil,
+	)
+	if err != nil {
+		logger.Panic("Could not declare a queue")
+	}
+
+	publisher := rabbitmq.NewPublisher(mqChannel, &mqCfg)
+
 	db, err := sql.Open("postgres", dbConnect)
-	defer db.Close()
 	if err != nil {
 		logger.Panic("Could not connect to the database")
 	}
+	defer db.Close()
 
 	ps := postgres.NewPostgresStorage(db)
 	h := resizer.HasherMD5{}
 	cl := resizer.ClockUTC{}
 	cnv := resizer.ConverterPNG{}
-	rSvc := resizesvc.NewResizeService(ps, cnv)
+	rSvc := resizesvc.NewResizeService(ps, cnv, publisher)
 	is := imageservice.NewImageService(ps, cl, h, cnv, rSvc)
 
 	handler := imageservice.MakeHTTPHandler(is)

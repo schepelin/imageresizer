@@ -16,7 +16,7 @@ import (
 
 var (
 	ErrImgDecode   = errors.New("could not decode image")
-	ErrNoImage	   = errors.New("no image found")
+	ErrNoImage     = errors.New("no image found")
 	StatusCreated  = "CREATED"
 	StatusFinished = "FINISHED"
 	StatusFailed   = "FAILED"
@@ -102,6 +102,6 @@ func (h HasherMD5) Gen(raw *[]byte) string {
 }
 
 type ResizeService interface {
-	ResizeAsync(ctx context.Context, req *ResizeServiceRequest) error
+	SendResizeJob(ctx context.Context, req *ResizeServiceRequest) error
 	// ResizeSync(ctx context.Context, raw *[]byte) (image.Image, error)
 }

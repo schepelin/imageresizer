@@ -5,7 +5,6 @@ import (
 	"github.com/golang/mock/gomock"
 	"github.com/schepelin/imageresizer/pkg/mocks"
 	"github.com/schepelin/imageresizer/pkg/resizer"
-	"github.com/schepelin/imageresizer/pkg/storage"
 	"github.com/stretchr/testify/assert"
 	"image"
 	"image/color"
@@ -25,8 +24,9 @@ func TestNewResizeService(t *testing.T) {
 
 	mockResizeStorage := mocks.NewMockResizeStorage(mockCtrl)
 	mockConverter := mocks.NewMockConverter(mockCtrl)
+	mockPublisher := mocks.NewMockPublisher(mockCtrl)
 
-	rs := NewResizeService(mockResizeStorage, mockConverter)
+	rs := NewResizeService(mockResizeStorage, mockConverter, mockPublisher)
 	assert.Equal(t, mockConverter, rs.Converter)
 	assert.Equal(t, mockResizeStorage, rs.Storage)
 }
@@ -37,9 +37,10 @@ func TestResizeService_ResizeAsync(t *testing.T) {
 
 	mockStorage := mocks.NewMockResizeStorage(mockCtrl)
 	mockConverter := mocks.NewMockConverter(mockCtrl)
+	mockPublisher := mocks.NewMockPublisher(mockCtrl)
 	ctx := context.TODO()
 
-	rs := NewResizeService(mockStorage, mockConverter)
+	rs := NewResizeService(mockStorage, mockConverter, mockPublisher)
 
 	req := resizer.ResizeServiceRequest{
 		JobId:  100500,
@@ -47,14 +48,16 @@ func TestResizeService_ResizeAsync(t *testing.T) {
 		Width:  20,
 		Height: 10,
 	}
-	imgSample := createSampleImage()
-	resizeRaw := []byte{4, 5, 6}
-	storageReq := storage.ResizeResultRequest{req.JobId, resizeRaw}
-	gomock.InOrder(
-		mockConverter.EXPECT().Transform(&req.RawImg).Return(imgSample, nil),
-		mockConverter.EXPECT().Resize(&imgSample, req.Width, req.Height).Return(resizeRaw, nil),
-		mockStorage.EXPECT().WriteResizeJobResult(ctx, &storageReq).Return(nil),
-	)
+	//imgSample := createSampleImage()
+	//resizeRaw := []byte{4, 5, 6}
+	//storageReq := storage.ResizeResultRequest{req.JobId, resizeRaw}
+
+	mockPublisher.EXPECT().PublishResizeJob(ctx, req.JobId).Return(nil)
+	//gomock.InOrder(
+	//	mockConverter.EXPECT().Transform(&req.RawImg).Return(imgSample, nil),
+	//	mockConverter.EXPECT().Resize(&imgSample, req.Width, req.Height).Return(resizeRaw, nil),
+	//	mockStorage.EXPECT().WriteResizeJobResult(ctx, &storageReq).Return(nil),
+	//)
 
 	err := rs.ResizeAsync(ctx, &req)
 	assert.NoError(t, err)

@@ -85,7 +85,7 @@ func (is *ImageService) ScheduleResizeJob(ctx context.Context, imgId string, wid
 		return nil, err
 	}
 
-	is.ResizeSvc.ResizeAsync(ctx, &resizer.ResizeServiceRequest{
+	is.ResizeSvc.SendResizeJob(ctx, &resizer.ResizeServiceRequest{
 		JobId:  resp.Id,
 		RawImg: resp.RawImg,
 		Width:  req.Width,
@@ -109,9 +109,9 @@ func (is *ImageService) GetResizeJob(ctx context.Context, jobId uint64) (*resize
 		return nil, err
 	}
 	return &resizer.ResizeJob{
-		Id: res.Id,
-		Status: res.Status,
-		Image:img,
-		CreatedAt:res.CreatedAt,
+		Id:        res.Id,
+		Status:    res.Status,
+		Image:     img,
+		CreatedAt: res.CreatedAt,
 	}, nil
 }
