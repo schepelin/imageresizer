@@ -38,8 +38,9 @@ func TestNewImageService(t *testing.T) {
 	mockStorage := mocks.NewMockStorage(mockCtrl)
 	mockHasher := mocks.NewMockHasher(mockCtrl)
 	mockConverter := mocks.NewMockConverter(mockCtrl)
+	mockResize := mocks.NewMockResizeService(mockCtrl)
 
-	is := NewImageService(mockStorage, mockClocker, mockHasher, mockConverter)
+	is := NewImageService(mockStorage, mockClocker, mockHasher, mockConverter, mockResize)
 
 	assert.Equal(t, is.Converter, mockConverter)
 	assert.Equal(t, is.Clock, mockClocker)
@@ -55,9 +56,10 @@ func TestImageService_Create(t *testing.T) {
 	mockStorage := mocks.NewMockStorage(mockCtrl)
 	mockHasher := mocks.NewMockHasher(mockCtrl)
 	mockConverter := mocks.NewMockConverter(mockCtrl)
+	mockResize := mocks.NewMockResizeService(mockCtrl)
 
 	ctx := context.TODO()
-	is := NewImageService(mockStorage, mockClocker, mockHasher, mockConverter)
+	is := NewImageService(mockStorage, mockClocker, mockHasher, mockConverter, mockResize)
 	rawByte := []byte{42, 10, 15}
 	expectedId := "42"
 	expectedCteatedAt := time.Date(1970, time.January, 1, 0, 0, 0, 0, time.UTC)
@@ -84,6 +86,7 @@ func TestImageService_Read(t *testing.T) {
 	mockStorage := mocks.NewMockStorage(mockCtrl)
 	mockHasher := mocks.NewMockHasher(mockCtrl)
 	mockConverter := mocks.NewMockConverter(mockCtrl)
+	mockResize := mocks.NewMockResizeService(mockCtrl)
 
 	expectedImage := createSampleImage()
 	expectedImageRaw := imageToByte(expectedImage)
@@ -94,7 +97,7 @@ func TestImageService_Read(t *testing.T) {
 		CreatedAt: time.Date(1970, time.January, 1, 0, 0, 0, 0, time.UTC),
 	}
 	ctx := context.TODO()
-	is := NewImageService(mockStorage, mockClocker, mockHasher, mockConverter)
+	is := NewImageService(mockStorage, mockClocker, mockHasher, mockConverter, mockResize)
 
 	mockConverter.EXPECT().Transform(gomock.Any()).Return(expectedImage, nil)
 	mockStorage.EXPECT().Get(ctx, imageModelId).Return(&storageReturnValue, nil)
@@ -113,13 +116,79 @@ func TestImageService_Delete(t *testing.T) {
 	mockStorage := mocks.NewMockStorage(mockCtrl)
 	mockHasher := mocks.NewMockHasher(mockCtrl)
 	mockConverter := mocks.NewMockConverter(mockCtrl)
+	mockResize := mocks.NewMockResizeService(mockCtrl)
 
 	ctx := context.TODO()
-	is := NewImageService(mockStorage, mockClocker, mockHasher, mockConverter)
+	is := NewImageService(mockStorage, mockClocker, mockHasher, mockConverter, mockResize)
 	imgId := "42"
 
 	mockStorage.EXPECT().Delete(ctx, "42").Return(nil).Times(1)
 	err := is.Delete(ctx, imgId)
 	assert.NoError(t, err)
+
+}
+
+func TestImageService_ScheduleResizeJob(t *testing.T) {
+	mockCtrl := gomock.NewController(t)
+	defer mockCtrl.Finish()
+
+	mockClocker := mocks.NewMockClocker(mockCtrl)
+	mockStorage := mocks.NewMockStorage(mockCtrl)
+	mockHasher := mocks.NewMockHasher(mockCtrl)
+	mockConverter := mocks.NewMockConverter(mockCtrl)
+	mockResize := mocks.NewMockResizeService(mockCtrl)
+
+	ctx := context.TODO()
+	imgId := "42322"
+	var w, h uint = 200, 100
+	is := NewImageService(mockStorage, mockClocker, mockHasher, mockConverter, mockResize)
+
+	response := storage.ResizeJobResponse{
+		Id:        100500,
+		Status:    "CREATED",
+		CreatedAt: time.Date(1970, time.January, 0, 0, 0, 0, 0, time.UTC),
+	}
+	expectedRequest := storage.ResizeJobRequest{imgId, w, h}
+	mockStorage.EXPECT().CreateResizeJob(ctx, &expectedRequest).Return(&response, nil)
+	mockResize.EXPECT().ResizeAsync(ctx, gomock.Any()).Return(nil)
+	rj, err := is.ScheduleResizeJob(ctx, imgId, w, h)
+	assert.NoError(t, err)
+
+	assert.Equal(t, response.CreatedAt, rj.CreatedAt)
+	assert.Equal(t, response.Status, rj.Status)
+	assert.Equal(t, response.Id, rj.Id)
+	assert.Nil(t, rj.Image)
+
+}
+
+func TestImageService_GetResizeJob(t *testing.T) {
+	mockCtrl := gomock.NewController(t)
+	defer mockCtrl.Finish()
+
+	mockClocker := mocks.NewMockClocker(mockCtrl)
+	mockStorage := mocks.NewMockStorage(mockCtrl)
+	mockHasher := mocks.NewMockHasher(mockCtrl)
+	mockConverter := mocks.NewMockConverter(mockCtrl)
+	mockResize := mocks.NewMockResizeService(mockCtrl)
+	ctx := context.TODO()
+
+	is := NewImageService(mockStorage, mockClocker, mockHasher, mockConverter, mockResize)
+	var jobId uint64 = 100500
+	imgSample := createSampleImage()
+	resp := storage.ResizeJobResponse{
+		Id: jobId,
+		Status: "CREATED",
+		CreatedAt: time.Date(1970, time.January, 0, 0, 0, 0, 0, time.UTC),
+		RawImg: []byte{1,2,3},
+	}
+
+	gomock.InOrder(
+		mockStorage.EXPECT().GetResizeJob(ctx, &storage.ResizeGetRequest{jobId}).Return(&resp, nil),
+		mockConverter.EXPECT().Transform(&resp.RawImg).Return(imgSample, nil),
+	)
+
+	job, err := is.GetResizeJob(ctx, jobId)
+	assert.NoError(t, err)
+	assert.Equal(t, job.Id, jobId)
 
 }

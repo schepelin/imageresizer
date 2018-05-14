@@ -3,7 +3,7 @@
 CREATE TABLE images (
     id varchar PRIMARY KEY,
     raw bytea NOT NULL,
-    created_at timestamp WITH TIME ZONE DEFAULT NOW()
+    created_at timestamp WITHOUT TIME ZONE DEFAULT NOW()
 );
 
 -- +migrate Down

@@ -5,6 +5,7 @@ import (
 	"database/sql"
 	"fmt"
 	"github.com/schepelin/imageresizer/pkg/migrations"
+	"github.com/schepelin/imageresizer/pkg/resizer"
 	"github.com/schepelin/imageresizer/pkg/storage"
 	"github.com/stretchr/testify/assert"
 	"golang.org/x/net/context"
@@ -31,6 +32,14 @@ func getRawImageSample() []byte {
 
 type dependencies struct {
 	db *sql.DB
+}
+
+func getImageRowDataDummy() (string, []byte, time.Time) {
+	imgId := "42010"
+	raw := []byte{42, 10, 15}
+	createdAt := time.Date(1970, time.January, 1, 0, 0, 1, 0, time.FixedZone("", 0))
+
+	return imgId, raw, createdAt
 }
 
 func preparator(t *testing.T, deps *dependencies) func() {
@@ -118,9 +127,7 @@ func TestPostgresStorage_Get(t *testing.T) {
 	ps := PostgresStorage{deps.db}
 
 	ctx := context.TODO()
-	imgId := "42"
-	expectedRaw := []byte{10, 42, 15}
-	expectedCreatedAt := time.Date(1970, time.January, 1, 0, 0, 0, 0, time.FixedZone("", 0))
+	imgId, expectedRaw, expectedCreatedAt := getImageRowDataDummy()
 	ps.DB.Exec("INSERT INTO images(id, raw, created_at) VALUES ($1, $2, $3)", imgId, string(expectedRaw), expectedCreatedAt)
 
 	imgModel, err := ps.Get(ctx, imgId)
@@ -137,12 +144,9 @@ func TestPostgresStorage_Delete(t *testing.T) {
 	var err error
 	defer preparator(t, &deps)()
 	ps := PostgresStorage{deps.db}
-
 	ctx := context.TODO()
-	imgId := "42010"
-	raw := []byte{42, 10, 15}
-	createdAt := time.Date(1970, time.January, 1, 0, 0, 1, 0, time.FixedZone("", 0))
 
+	imgId, raw, createdAt := getImageRowDataDummy()
 	ps.DB.Exec("INSERT INTO images(id, raw, created_at) VALUES ($1, $2, $3)", imgId, raw, createdAt)
 
 	err = ps.Delete(ctx, imgId)
@@ -176,4 +180,101 @@ func TestPostgresStorage_Create(t *testing.T) {
 	assert.Equal(t, imgModel.Raw, []byte(actualRaw))
 
 	assert.Equal(t, imgModel.CreatedAt, actualCreatedAt)
+}
+
+func TestPostgresStorage_CreateResizeJob(t *testing.T) {
+	var deps dependencies
+	defer preparator(t, &deps)()
+	ps := PostgresStorage{deps.db}
+	ctx := context.TODO()
+	imgId, raw, imgCreatedAt := getImageRowDataDummy()
+	ps.DB.Exec("INSERT INTO images(id, raw, created_at) VALUES ($1, $2, $3)", imgId, raw, imgCreatedAt)
+
+	req := storage.ResizeJobRequest{
+		ImgId:  imgId,
+		Width:  10,
+		Height: 20,
+	}
+	resp, err := ps.CreateResizeJob(ctx, &req)
+	assert.NoError(t, err)
+	assert.Equal(t, resizer.StatusCreated, resp.Status)
+
+	var jobId uint64
+	var createdAt time.Time
+	err = ps.DB.QueryRow(
+		"SELECT id, created_at from resize_jobs where image_id=$1 AND width=$2 AND height=$3",
+		imgId, req.Width, req.Height,
+	).Scan(&jobId, &createdAt)
+
+	assert.NoError(t, err)
+	assert.Equal(t, jobId, resp.Id)
+	assert.Equal(t, createdAt, resp.CreatedAt)
+
+}
+
+func TestPostgresStorage_CreateResizeJob_ThereIsNoImage(t *testing.T) {
+	var deps dependencies
+	defer preparator(t, &deps)()
+	ps := PostgresStorage{deps.db}
+	ctx := context.TODO()
+	req := storage.ResizeJobRequest{
+		ImgId:  "there_is_no_such_image",
+		Width:  10,
+		Height: 20,
+	}
+	_, err := ps.CreateResizeJob(ctx, &req)
+	assert.Equal(t, storage.ErrNoImageFound, err)
+}
+func TestPostgresStorage_WriteResizeJobResult(t *testing.T) {
+	var deps dependencies
+	defer preparator(t, &deps)()
+	ps := PostgresStorage{deps.db}
+	ctx := context.TODO()
+
+	imgId, raw, createdAt := getImageRowDataDummy()
+	ps.DB.Exec("INSERT INTO images(id, raw, created_at) VALUES ($1, $2, $3)", imgId, raw, createdAt)
+	expectedRaw := []byte{1, 2, 3}
+	var jobId uint64
+	imgSize := 100
+	err := ps.DB.QueryRow(
+		`INSERT INTO resize_jobs(image_id, status, width, height) VALUES ($1, $2, $3, $3) RETURNING id`,
+		imgId, resizer.StatusCreated, imgSize,
+	).Scan(&jobId)
+	if err != nil {
+		t.Error(err.Error())
+	}
+
+	ps.WriteResizeJobResult(ctx, &storage.ResizeResultRequest{jobId, expectedRaw})
+	var actualStatus string
+	var actualRaw string
+	err = ps.DB.QueryRow("SELECT status, raw FROM resize_jobs WHERE id=$1", jobId).Scan(&actualStatus, &actualRaw)
+
+	assert.NoError(t, err)
+	assert.Equal(t, resizer.StatusFinished, actualStatus)
+	assert.Equal(t, expectedRaw, []byte(actualRaw))
+
+}
+
+func TestPostgresStorage_GetResizeJob(t *testing.T) {
+	var deps dependencies
+	defer preparator(t, &deps)()
+	ps := PostgresStorage{deps.db}
+	ctx := context.TODO()
+
+	imgId, raw, createdAt := getImageRowDataDummy()
+	ps.DB.Exec("INSERT INTO images(id, raw, created_at) VALUES ($1, $2, $3)", imgId, raw, createdAt)
+	expectedRaw := []byte{1, 2, 3}
+	var jobId uint64
+	imgSize := 100
+	err := ps.DB.QueryRow(
+		`INSERT INTO resize_jobs(image_id, status, width, height, raw) VALUES ($1, $2, $3, $3, $4) RETURNING id`,
+		imgId, resizer.StatusCreated, imgSize, string(expectedRaw),
+	).Scan(&jobId)
+
+	assert.NoError(t, err)
+
+	jobRes, err := ps.GetResizeJob(ctx, &storage.ResizeGetRequest{JobId: jobId})
+	assert.NoError(t, err)
+	assert.Equal(t, jobId, jobRes.Id)
+	assert.Equal(t, expectedRaw, jobRes.RawImg)
 }

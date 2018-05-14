@@ -5,6 +5,7 @@ import (
 	"github.com/go-kit/kit/endpoint"
 	"github.com/schepelin/imageresizer/pkg/resizer"
 	"image"
+	"time"
 )
 
 type createImageRequest struct {
@@ -31,6 +32,27 @@ type deleteImageRequest struct {
 
 type deleteImageResponse struct {
 	Err string `json:"err,omitempty"`
+}
+
+type createResizeRequest struct {
+	ImgId  string
+	Width  uint `json:"width"`
+	Height uint `json:"height"`
+}
+
+type createResizeResponse struct {
+	Err       string    `json:"err,omitempty"`
+	Status    string    `json:"status"`
+	CreatedAt time.Time `json:"created_at"`
+}
+
+type getResizeJobRequest struct {
+	JobId uint64
+}
+
+type getResizeJobResponse struct {
+	Img image.Image
+	Err error
 }
 
 func MakeCreateImageEndpoint(svc resizer.ImageService) endpoint.Endpoint {
@@ -66,16 +88,42 @@ func MakeDeleteImageEndpoint(svc resizer.ImageService) endpoint.Endpoint {
 	}
 }
 
+func MakeScheduleResizeJobEndpoint(svc resizer.ImageService) endpoint.Endpoint {
+	return func(ctx context.Context, request interface{}) (interface{}, error) {
+		req := request.(createResizeRequest)
+		job, err := svc.ScheduleResizeJob(ctx, req.ImgId, req.Width, req.Height)
+		if err != nil {
+			return createResizeResponse{err.Error(), resizer.StatusFailed, time.Time{}}, nil
+		}
+		return createResizeResponse{"", job.Status, job.CreatedAt}, nil
+	}
+}
+
+func MakeGetResizeJobEndpoint(svc resizer.ImageService) endpoint.Endpoint {
+	return func(ctx context.Context, request interface{}) (interface{}, error) {
+		req := request.(getResizeJobRequest)
+		job, err := svc.GetResizeJob(ctx, req.JobId)
+		if err != nil {
+			return getResizeJobResponse{nil, resizer.ErrNoImage}, nil
+		}
+		return getResizeJobResponse{job.Image, nil}, nil
+	}
+}
+
 type Endpoints struct {
-	CreateImageEndpoint endpoint.Endpoint
-	GetImageEndpoint    endpoint.Endpoint
-	DeleteImageEndpoint endpoint.Endpoint
+	CreateImageEndpoint       endpoint.Endpoint
+	GetImageEndpoint          endpoint.Endpoint
+	DeleteImageEndpoint       endpoint.Endpoint
+	ScheduleResizeJobEndpoint endpoint.Endpoint
+	GetResizeJobEndpoint      endpoint.Endpoint
 }
 
 func MakeServerEndpoint(svc resizer.ImageService) Endpoints {
 	return Endpoints{
-		CreateImageEndpoint: MakeCreateImageEndpoint(svc),
-		GetImageEndpoint:    MakeGetImageEndpoint(svc),
-		DeleteImageEndpoint: MakeDeleteImageEndpoint(svc),
+		CreateImageEndpoint:       MakeCreateImageEndpoint(svc),
+		GetImageEndpoint:          MakeGetImageEndpoint(svc),
+		DeleteImageEndpoint:       MakeDeleteImageEndpoint(svc),
+		ScheduleResizeJobEndpoint: MakeScheduleResizeJobEndpoint(svc),
+		GetResizeJobEndpoint:	   MakeGetResizeJobEndpoint(svc),
 	}
 }

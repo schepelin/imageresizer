@@ -74,6 +74,19 @@ func (mr *MockImageServiceMockRecorder) Delete(ctx, imgId interface{}) *gomock.C
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Delete", reflect.TypeOf((*MockImageService)(nil).Delete), ctx, imgId)
 }
 
+// ScheduleResizeJob mocks base method
+func (m *MockImageService) ScheduleResizeJob(ctx context.Context, imgId string, width, height uint) (*resizer.ResizeJob, error) {
+	ret := m.ctrl.Call(m, "ScheduleResizeJob", ctx, imgId, width, height)
+	ret0, _ := ret[0].(*resizer.ResizeJob)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// ScheduleResizeJob indicates an expected call of ScheduleResizeJob
+func (mr *MockImageServiceMockRecorder) ScheduleResizeJob(ctx, imgId, width, height interface{}) *gomock.Call {
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ScheduleResizeJob", reflect.TypeOf((*MockImageService)(nil).ScheduleResizeJob), ctx, imgId, width, height)
+}
+
 // MockClocker is a mock of Clocker interface
 type MockClocker struct {
 	ctrl     *gomock.Controller
@@ -178,4 +191,52 @@ func (m *MockConverter) Transform(raw *[]byte) (image.Image, error) {
 // Transform indicates an expected call of Transform
 func (mr *MockConverterMockRecorder) Transform(raw interface{}) *gomock.Call {
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Transform", reflect.TypeOf((*MockConverter)(nil).Transform), raw)
+}
+
+// Resize mocks base method
+func (m *MockConverter) Resize(img *image.Image, width, height uint) ([]byte, error) {
+	ret := m.ctrl.Call(m, "Resize", img, width, height)
+	ret0, _ := ret[0].([]byte)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// Resize indicates an expected call of Resize
+func (mr *MockConverterMockRecorder) Resize(img, width, height interface{}) *gomock.Call {
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Resize", reflect.TypeOf((*MockConverter)(nil).Resize), img, width, height)
+}
+
+// MockResizeService is a mock of ResizeService interface
+type MockResizeService struct {
+	ctrl     *gomock.Controller
+	recorder *MockResizeServiceMockRecorder
+}
+
+// MockResizeServiceMockRecorder is the mock recorder for MockResizeService
+type MockResizeServiceMockRecorder struct {
+	mock *MockResizeService
+}
+
+// NewMockResizeService creates a new mock instance
+func NewMockResizeService(ctrl *gomock.Controller) *MockResizeService {
+	mock := &MockResizeService{ctrl: ctrl}
+	mock.recorder = &MockResizeServiceMockRecorder{mock}
+	return mock
+}
+
+// EXPECT returns an object that allows the caller to indicate expected use
+func (m *MockResizeService) EXPECT() *MockResizeServiceMockRecorder {
+	return m.recorder
+}
+
+// ResizeAsync mocks base method
+func (m *MockResizeService) ResizeAsync(ctx context.Context, req *resizer.ResizeServiceRequest) error {
+	ret := m.ctrl.Call(m, "ResizeAsync", ctx, req)
+	ret0, _ := ret[0].(error)
+	return ret0
+}
+
+// ResizeAsync indicates an expected call of ResizeAsync
+func (mr *MockResizeServiceMockRecorder) ResizeAsync(ctx, req interface{}) *gomock.Call {
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ResizeAsync", reflect.TypeOf((*MockResizeService)(nil).ResizeAsync), ctx, req)
 }
