@@ -124,6 +124,6 @@ func MakeServerEndpoint(svc resizer.ImageService) Endpoints {
 		GetImageEndpoint:          MakeGetImageEndpoint(svc),
 		DeleteImageEndpoint:       MakeDeleteImageEndpoint(svc),
 		ScheduleResizeJobEndpoint: MakeScheduleResizeJobEndpoint(svc),
-		GetResizeJobEndpoint:	   MakeGetResizeJobEndpoint(svc),
+		GetResizeJobEndpoint:      MakeGetResizeJobEndpoint(svc),
 	}
 }

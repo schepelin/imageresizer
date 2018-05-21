@@ -129,3 +129,21 @@ func (ps *PostgresStorage) GetResizeJob(
 	resp.RawImg = []byte(rawImg)
 	return &resp, nil
 }
+
+func (ps *PostgresStorage) GetResizeJobForUpdate(
+	ctx context.Context, jobId uint64) (*storage.GetResizeJobResponse, error) {
+	var resp storage.GetResizeJobResponse
+	var rawImg string
+
+	err := ps.DB.QueryRow(
+		`SELECT imgs.raw, jobs.width, jobs.height 
+		FROM resize_jobs AS jobs JOIN images AS imgs 
+		ON jobs.image_id = imgs.id WHERE jobs.id=$1 FOR UPDATE`,
+		jobId,
+	).Scan(&rawImg, &resp.Width, &resp.Height)
+	if err != nil {
+		return nil, err
+	}
+	resp.RawImg = []byte(rawImg)
+	return &resp, nil
+}
